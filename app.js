@@ -8,14 +8,15 @@ let cardImageIndexes = {};
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+// 🎯 دسته‌بندی‌ها دقیقاً مطابق با اسامی ست شده با بات تلگرامی شما تغییر یافتند
 const mainCategories = [
-    { id: 'car', labelFa: 'ماشین‌ها', labelEn: 'Cars', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
-    { id: 'map', labelFa: 'نقشه‌ها', labelEn: 'Maps', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
-    { id: 'app', labelFa: 'برنامه‌ها', labelEn: 'Apps / HUD', icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' },
-    { id: 'csp', labelFa: 'تنظیمات CSP', labelEn: 'CSP Presets', icon: '⚙️', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400' },
-    { id: 'driver', labelFa: 'راننده‌ها و لباس', labelEn: 'Drivers & Suits', icon: '🕴️', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=400' },
-    { id: 'server', labelFa: 'سرورها', labelEn: 'Servers', icon: '🖥️', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=400' },
-    { id: 'graphic', labelFa: 'گرافیک و فیلترها', labelEn: 'Graphics & PPFilter', icon: '🌠', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' }
+    { id: 'car', labelFa: 'خودرو', labelEn: 'Car', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
+    { id: 'map', labelFa: 'نقشه', labelEn: 'Map', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
+    { id: 'app', labelFa: 'برنامه', labelEn: 'App', icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' },
+    { id: 'csp', labelFa: 'کانفیگ', labelEn: 'CSP', icon: '⚙️', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400' },
+    { id: 'driver', labelFa: 'درایور', labelEn: 'Driver', icon: '🕴️', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=400' },
+    { id: 'server', labelFa: 'سرور', labelEn: 'Server', icon: '🖥️', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=400' },
+    { id: 'graphic', labelFa: 'گرافیک', labelEn: 'Graphic', icon: '🌠', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' }
 ];
 
 const locales = {
@@ -27,14 +28,14 @@ const locales = {
         audioOff: "صدا: خاموش",
         searchPlaceholder: "جستجو پیشرفته در دیتابیس...",
         latestLabel: "جدیدترین‌ها (۹ پست آخر)",
-        adminLeaderboard: "لیدربرد ادمین ها", // تصحیح نهایی دکمه هاب
+        adminLeaderboard: "لیدربرد ادمین ها",
         copyright: "تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.",
         noItem: "هیچ موردی پیدا نشد.",
         downloadMod: "دانلود مود",
         specifications: "SPECIFICATIONS",
         modalDesc: "توضیحات و بررسی فنی:",
         modalTags: "تگ‌های متادیتا:",
-        modalDev: "سازنده مود",
+        modalDev: "سازنده مود:",
         activeMods: "پست", 
         exitHub: "خروج از هاب"
     },
@@ -53,7 +54,7 @@ const locales = {
         specifications: "SPECIFICATIONS",
         modalDesc: "Technical Description:",
         modalTags: "Metadata Tags:",
-        modalDev: "Developer",
+        modalDev: "Developer:",
         activeMods: "Post",
         exitHub: "Exit Mod Hub"
     }
@@ -146,7 +147,7 @@ async function init() {
     handleRouting(); 
 }
 
-// 🎯 اعمال جابه‌جایی ادمین و کریتور بر اساس تغییر چیدمان دیتابیس جدید شما
+// 🎯 تصحیح کامل جابجایی ترتیب ستون ادمین و سازنده از روی ردیف‌های خام ارسالی گوگل شیت
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -159,6 +160,7 @@ async function fetchModsFromSheets() {
             return {
                 id: cells[0] ? String(cells[0].v) : String(idx),
                 title: cells[1] ? String(cells[1].v) : '',
+                // حذف تمام فاصله‌ها و کوچک کردن حروف برای فیلتر بی‌نقص دسته‌بندی
                 category: cells[2] ? String(cells[2].v).toLowerCase().trim() : '',
                 brand: cells[3] ? String(cells[3].v) : '',
                 subcategory: cells[4] ? String(cells[4].v) : '',
@@ -166,10 +168,10 @@ async function fetchModsFromSheets() {
                 image2: cells[6] ? String(cells[6].v) : '',
                 image3: cells[7] ? String(cells[7].v) : '',
                 size: cells[8] ? String(cells[8].v) : '',
-                adminName: cells[9] ? String(cells[9].v) : 'Admin', // جابجا شده به ستون ۹ طبق دستور شما
+                creator: cells[9] ? String(cells[9].v) : 'Unknown', // سازنده اصلی مود
                 download: cells[10] ? String(cells[10].v) : '#',     
                 description: cells[11] ? String(cells[11].v) : '',  
-                creator: cells[12] ? String(cells[12].v) : 'Unknown', // جابجا شده به ستون ۱۲ طبق دستور شما
+                adminName: cells[12] ? String(cells[12].v) : 'Admin', // ادمین منتشرکننده
                 tags: cells[13] ? String(cells[13].v).split(',').map(t => t.trim()) : ['mod'], 
                 password: cells[14] ? String(cells[14].v) : ''       
             };
@@ -320,6 +322,10 @@ function renderCards(mods) {
         cardBox.className = "stagger-card flex flex-col gap-3 relative pt-6"; 
         cardBox.style.animationDelay = `0.02s`;
         
+        // پیدا کردن تایتل یا آیکون متناسب با دسته بندی مود جهت نمایش روی تگ وضعیت دکمه
+        const currentCatObj = mainCategories.find(c => c.id === mod.category);
+        const displayLabel = currentCatObj ? (currentLang === 'fa' ? currentCatObj.labelFa : currentCatObj.labelEn) : mod.category;
+
         cardBox.innerHTML = `
             <div class="absolute top-[-25px] left-1/2 -translate-x-1/2 z-20 bg-slate-900 dark:bg-slate-950 text-white border border-indigo-500/40 px-4 py-1.5 rounded-full text-xs font-black shadow-lg tracking-wide whitespace-nowrap">
                 ${mod.title}
@@ -344,7 +350,7 @@ function renderCards(mods) {
                         <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
                         <span class="text-indigo-400 font-bold"><i class="fas fa-user-shield ml-1"></i>${mod.adminName}</span>
                     </div>
-                    <span class="font-black text-zoneGlow uppercase text-[9px] bg-zoneAccent/10 px-2 py-0.5 rounded-md border border-zoneAccent/20">${mod.brand || mod.category}</span>
+                    <span class="font-black text-zoneGlow uppercase text-[9px] bg-zoneAccent/10 px-2 py-0.5 rounded-md border border-zoneAccent/20">${mod.brand || displayLabel}</span>
                 </div>
             </div>
 
@@ -357,7 +363,7 @@ function renderCards(mods) {
                     <i class="fas fa-key"></i>
                 </button>
 
-                <a href="${mod.download}" target="_blank" onclick="playSound('click'); event.stopPropagation();" class="btn-download-unique flex-1 h-10 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2">
+                <a href="${mod.download}" target="_blank" onclick="playSound('click'); event.stopPropagation();" class="btn-download-rgb flex-1 h-10 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2">
                     <i class="fas fa-download text-xs"></i> ${t.downloadMod}
                 </a>
 
@@ -375,7 +381,7 @@ function copyPassword(event, pass) {
     playSound('click');
     if(!pass) return;
     navigator.clipboard.writeText(pass).then(() => {
-        // کپی با موفقیت انجام شد
+        // انجام شد
     }).catch(err => console.error(err));
 }
 
@@ -413,9 +419,9 @@ function swapCardImages(cardIdx) {
     cardImageIndexes[cardIdx] = (currentIdx + 1) % 3;
 }
 
-// 🎯 اصلاح کامل منطق فیلتر جهت بارگذاری دقیق بدون جا افتادن هیچ کدهای کتگوری
+// 🎯 اعمال فیلترینگ دقیق و کیس-اینسنسیتیو بدون جا افتادن هیچ مودی از لیست شیت شما
 function filterAndRender() {
-    const search = document.getElementById('searchBar').value.toLowerCase();
+    const search = document.getElementById('searchBar').value.toLowerCase().trim();
     let filtered = [];
 
     if (currentCategory === 'latest') {
@@ -442,10 +448,13 @@ function openInfoModal(event, index) {
     const mod = allMods[index];
     if(!mod) return;
 
+    const currentCatObj = mainCategories.find(c => c.id === mod.category);
+    const displayLabel = currentCatObj ? (currentLang === 'fa' ? currentCatObj.labelFa : currentCatObj.labelEn) : mod.category;
+
     document.getElementById('infoModalTitle').innerText = mod.title.toUpperCase();
     document.getElementById('infoModalDesc').innerText = mod.description || "...";
     document.getElementById('infoModalCreator').innerText = mod.creator; 
-    document.getElementById('infoModalCategory').innerText = mod.category.toUpperCase();
+    document.getElementById('infoModalCategory').innerText = displayLabel.toUpperCase();
     
     const tagsBox = document.getElementById('infoModalTags'); tagsBox.innerHTML = '';
     mod.tags.forEach(t => {
