@@ -5,6 +5,7 @@ let openCategoryTree = {};
 let isMuted = false;
 let currentLang = 'fa'; 
 let cardImageIndexes = {}; 
+let isDatabaseLoaded = false; // پرچم بررسی بارگذاری نهایی داده‌ها
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -91,8 +92,10 @@ function toggleThemeMode() {
     const icon = document.querySelector('#themeBtn i');
     if (html.classList.contains('dark')) {
         html.classList.remove('dark');
+        html.classList.add('light');
         icon.className = 'fas fa-sun';
     } else {
+        html.classList.remove('light');
         html.classList.add('dark');
         icon.className = 'fas fa-moon';
     }
@@ -146,14 +149,15 @@ const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_I
 async function init() {
     document.getElementById('htmlTag').classList.add('dark'); 
     mainCategories.forEach(c => openCategoryTree[c.id] = false); 
-    await fetchModsFromSheets();
     renderCategoriesMenu();
     window.addEventListener('hashchange', handleRouting);
     handleRouting(); 
     updateDOMTranslations();
+
+    // شروع فرآیند دریافت موازی داده‌ها از شیت
+    await fetchModsFromSheets();
 }
 
-// 🎯 انطباق دقیق ستون‌ها طبق نقشه دریافتی تایید شده (A=0 تا O=14)
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -181,6 +185,10 @@ async function fetchModsFromSheets() {
                 password: cells[14] ? String(cells[14].v) : ''
             };
         }).filter(item => item.id && item.title).reverse(); 
+        
+        isDatabaseLoaded = true; // تغییر وضعیت لودینگ به پایان یافته
+        renderExplorerTree();
+        filterAndRender();
     } catch (e) { console.error(e); }
 }
 
@@ -190,7 +198,7 @@ function renderCategoriesMenu() {
     mainCategories.forEach(cat => {
         const currentTitle = currentLang === 'fa' ? cat.labelFa : cat.labelEn;
         grid.innerHTML += `
-            <div onclick="navigateTo('gallery', '${cat.id}')" class="relative h-32 sm:h-36 rounded-2xl overflow-hidden cursor-pointer group dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 hover:scale-[1.01] transition-all duration-200">
+            <div onclick="navigateTo('gallery', '${cat.id}')" class="relative h-32 sm:h-36 rounded-2xl overflow-hidden cursor-pointer group dark:bg-zoneBgMuted bg-white border dark:border-white/5 border-black/5 hover:scale-[1.01] transition-all duration-200">
                 <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:opacity-20 transition-all duration-300 blur-[0.2px]">
                 <div class="absolute inset-0 bg-gradient-to-t dark:from-zoneBg from-white via-transparent to-transparent flex flex-col justify-end p-4">
                     <span class="text-2xl mb-1">${cat.icon}</span>
@@ -206,13 +214,15 @@ function renderExplorerTree() {
     treeContainer.innerHTML = '';
     const t = locales[currentLang];
 
+    const countLabel = isDatabaseLoaded ? Math.min(allMods.length, 9) : '...';
+
     const latestActive = (currentCategory === 'latest') ? 'bg-zoneAccent text-white font-black shadow-md' : 'text-gray-400 hover:bg-black/5 dark:hover:bg-white/5';
     treeContainer.innerHTML += `
         <div onclick="navigateTo('gallery', 'latest')" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${latestActive}">
             <div class="flex items-center gap-2">
                 <i class="fas fa-layer-group text-[10px] opacity-80"></i> <span>${t.latestLabel}</span>
             </div>
-            <span class="text-[9px] bg-black/30 px-1.5 py-0.5 rounded-md text-gray-400 border border-white/5">${Math.min(allMods.length, 9)}</span>
+            <span class="text-[9px] bg-black/30 px-1.5 py-0.5 rounded-md text-gray-400 border border-white/5">${countLabel}</span>
         </div>
     `;
 
@@ -224,8 +234,10 @@ function renderExplorerTree() {
 
         let subItemsHtml = '';
         let subs = [];
-        if (cat.id === 'cars') subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
-        else subs = [...new Set(allMods.filter(m => m.category === cat.id).map(m => m.subcategory))].filter(Boolean);
+        if (isDatabaseLoaded) {
+            if (cat.id === 'cars') subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
+            else subs = [...new Set(allMods.filter(m => m.category === cat.id).map(m => m.subcategory))].filter(Boolean);
+        }
 
         if (subs.length > 0) {
             subItemsHtml = `<div class="submenu-transition ${isOpen ? 'submenu-open' : ''} flex flex-col pr-3 my-1 border-r dark:border-white/5 border-black/5 mr-2 gap-0.5">`;
@@ -305,6 +317,27 @@ function showPage(pageId) {
     if (pageId === 'galleryPage') document.getElementById('mainHeader').classList.remove('hidden');
 }
 
+// 🎯 لودینگ اسکلتون متحرک پیشرفته برای لودهای سنگین دیتابیس
+function renderSkeletonLoaders() {
+    const grid = document.getElementById('modsGrid');
+    grid.innerHTML = '';
+    for(let i=0; i<6; i++) {
+        grid.innerHTML += `
+            <div class="flex flex-col gap-3 relative pt-4 opacity-70">
+                <div class="skeleton-block w-32 h-6 mx-auto rounded-full"></div>
+                <div class="skeleton-block w-full h-[210px] rounded-[1.5rem]"></div>
+                <div class="skeleton-block w-full h-8 rounded-xl mt-1"></div>
+                <div class="flex gap-2 w-full">
+                    <div class="skeleton-block w-10 h-10 rounded-xl"></div>
+                    <div class="skeleton-block w-10 h-10 rounded-xl"></div>
+                    <div class="skeleton-block flex-1 h-10 rounded-xl"></div>
+                    <div class="skeleton-block w-10 h-10 rounded-xl"></div>
+                </div>
+            </div>
+        `;
+    }
+}
+
 function renderCards(mods) {
     const grid = document.getElementById('modsGrid');
     grid.innerHTML = '';
@@ -317,7 +350,7 @@ function renderCards(mods) {
 
     mods.forEach((mod) => {
         const trueGlobalIndex = allMods.findIndex(m => m.id === mod.id);
-        cardImageIndexes[trueGlobalIndex] = 0; // تصویر فعال اولیه
+        cardImageIndexes[trueGlobalIndex] = 0;
 
         const img1 = mod.image1 || 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400';
         const img2 = mod.image2 || img1;
@@ -348,7 +381,7 @@ function renderCards(mods) {
             </div>
 
             <div class="mt-0.5 flex flex-col gap-2 px-1">
-                <div class="flex justify-between items-center dark:bg-[#11121c]/80 bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 dark:border-white/5 border-black/5 shadow-sm">
+                <div class="flex justify-between items-center dark:bg-zoneBg bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 dark:border-white/5 border-black/5 shadow-sm">
                     <div class="flex items-center gap-3 font-medium">
                         <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
                         <span class="text-indigo-400 font-bold"><i class="fas fa-user-shield ml-1"></i>${mod.adminName}</span>
@@ -358,11 +391,11 @@ function renderCards(mods) {
             </div>
 
             <div class="w-full flex gap-1.5">
-                <button onclick="openInfoModal(event, ${trueGlobalIndex})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-gray-400 hover:text-white text-xs transition-all active:scale-95">
+                <button onclick="openInfoModal(event, ${trueGlobalIndex})" class="w-10 h-10 dark:bg-zoneBgMuted bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-gray-400 hover:text-white text-xs transition-all active:scale-95">
                     <i class="fas fa-info"></i>
                 </button>
                 
-                <button onclick="copyPassword(event, '${mod.password}')" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-amber-500 text-xs transition-all active:scale-95" title="Copy Password">
+                <button onclick="copyPassword(event, '${mod.password}')" class="w-10 h-10 dark:bg-zoneBgMuted bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-amber-500 text-xs transition-all active:scale-95" title="Copy Password">
                     <i class="fas fa-key"></i>
                 </button>
 
@@ -370,7 +403,7 @@ function renderCards(mods) {
                     <i class="fas fa-download text-xs"></i> ${t.downloadMod}
                 </a>
 
-                <button onclick="swapCardImages(${trueGlobalIndex})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-indigo-400 text-xs transition-all active:scale-95">
+                <button onclick="swapCardImages(${trueGlobalIndex})" class="w-10 h-10 dark:bg-zoneBgMuted bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-indigo-400 text-xs transition-all active:scale-95">
                     <i class="fas fa-images"></i>
                 </button>
             </div>
@@ -386,7 +419,6 @@ function copyPassword(event, pass) {
     navigator.clipboard.writeText(pass);
 }
 
-// 🎯 مکانیزم بهینه اسلاید تصاویر چرخشی ۳ تایی بدون لگ و هنگی
 function swapCardImages(cardIdx) {
     playSound('flip');
     const currentIdx = cardImageIndexes[cardIdx]; 
@@ -417,6 +449,12 @@ function swapCardImages(cardIdx) {
 }
 
 function filterAndRender() {
+    // اگر هنوز دیتابیس لود نشده، لودینگ مجازی را نمایش بده
+    if (!isDatabaseLoaded) {
+        renderSkeletonLoaders();
+        return;
+    }
+
     const search = document.getElementById('searchBar').value.toLowerCase().trim();
     let filtered = [];
 
@@ -445,7 +483,7 @@ function openInfoModal(event, index) {
     if(!mod) return;
 
     const currentCatObj = mainCategories.find(c => c.id === mod.category);
-    const displayLabel = currentCatObj ? (currentLang === 'fa' ? currentCatObj.labelFa : currentCatObj.labelEn) : mod.category;
+    const displayLabel = currentCatObj ? (currentLang === 'fa' ? currentCatObj.labelFa : currentLang === 'fa' ? currentCatObj.labelFa : currentCatObj.labelEn) : mod.category;
 
     document.getElementById('infoModalTitle').innerText = mod.title.toUpperCase();
     document.getElementById('infoModalDesc').innerText = mod.description || "...";
@@ -468,6 +506,8 @@ function closeInfoModal() {
 
 function openLeaderboard() {
     playSound('click');
+    if (!isDatabaseLoaded) return;
+
     const counts = {};
     allMods.forEach(m => { const name = m.adminName || 'Admin'; counts[name] = (counts[name] || 0) + 1; });
 
