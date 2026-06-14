@@ -8,7 +8,6 @@ let cardImageIndexes = {};
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// پالت بومی و ترجمه زبان ایران اسلاید زون با دکمه دانلود کاملاً تفکیک شده فارسی و انگلیسی
 const locales = {
     fa: {
         title: "ایران اسلاید زون",
@@ -18,14 +17,14 @@ const locales = {
         audioOff: "صدا: خاموش",
         searchPlaceholder: "جستجو پیشرفته در دیتابیس...",
         latestLabel: "جدیدترین‌ها (۹ پست آخر)",
-        adminLeaderboard: "🏆 جدول ادمین‌های فعال",
+        adminLeaderboard: "جدول ادمین‌های فعال", // آیکون کیبوردی طبق دستور شما حذف شد
         copyright: "تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.",
         noItem: "هیچ موردی پیدا نشد.",
-        downloadMod: "دانلود مود پریمیوم", // اصلاح متن به زبان فارسی روان طبق خواسته شما
+        downloadMod: "دانلود مود", // اصلاح طبق دستور شما
         specifications: "SPECIFICATIONS",
         modalDesc: "توضیحات و بررسی فنی:",
         modalTags: "تگ‌های متادیتا:",
-        modalDev: "توسعه و تست",
+        modalDev: "سازنده مود",
         activeMods: "مود فعال",
         exitHub: "خروج از هاب"
     },
@@ -37,7 +36,7 @@ const locales = {
         audioOff: "Audio: OFF",
         searchPlaceholder: "Advanced database search...",
         latestLabel: "Latest Updates (Last 9 Posts)",
-        adminLeaderboard: "🏆 Active Admins Leaderboard",
+        adminLeaderboard: "Active Admins Leaderboard",
         copyright: "All rights and copyright reserved for Nima Shahsavarzadeh.",
         noItem: "No matching mods found.",
         downloadMod: "DOWNLOAD MOD",
@@ -88,7 +87,6 @@ function toggleThemeMode() {
 function toggleLanguage() {
     playSound('click');
     currentLang = currentLang === 'fa' ? 'en' : 'fa';
-    
     const html = document.getElementById('htmlTag');
     if(currentLang === 'en') {
         html.dir = 'ltr'; html.lang = 'en';
@@ -97,7 +95,6 @@ function toggleLanguage() {
         html.dir = 'rtl'; html.lang = 'fa';
         document.getElementById('langBtn').innerText = 'EN';
     }
-    
     updateDOMTranslations();
 }
 
@@ -112,7 +109,7 @@ function updateDOMTranslations() {
     document.getElementById('sideLeaderboardBtn').querySelector('span').innerText = t.adminLeaderboard;
     document.getElementById('modalDescTitle').innerText = t.modalDesc;
     document.getElementById('modalTagsTitle').innerText = t.modalTags;
-    document.getElementById('modalAuthorTitle').innerText = t.modalDev;
+    document.getElementById('modalDevTitle').innerText = t.modalDev;
     document.getElementById('exitHubBtn').innerHTML = currentLang==='fa' ? '<i class="fas fa-arrow-right ml-1"></i> خروج از هاب' : 'Exit Mod Hub <i class="fas fa-arrow-left ml-1"></i>';
 
     renderExplorerTree();
@@ -144,6 +141,7 @@ async function init() {
     handleRouting(); 
 }
 
+// نگاشت (Mapping) فیلدهای جدید گوگل شیت بر اساس چیدمان پیوست شده شما
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -163,14 +161,12 @@ async function fetchModsFromSheets() {
                 image2: cells[6] ? String(cells[6].v) : '',
                 image3: cells[7] ? String(cells[7].v) : '',
                 size: cells[8] ? String(cells[8].v) : '',
-                version: cells[9] ? String(cells[9].v) : '1.0',
+                developer: cells[9] ? String(cells[9].v) : 'Unknown', // ستون سازنده جایگزین ورژن شد
                 download: cells[10] ? String(cells[10].v) : '#',
-                description: cells[11] ? String(cells[11].v) : '',
-                author: {
-                    name: cells[12] ? String(cells[12].v) : 'Admin',
-                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(cells[12] ? cells[12].v : 'Admin')}`
-                },
-                tags: cells[13] ? String(cells[13].v).split(',').map(t => t.trim()) : ['mod']
+                password: cells[11] ? String(cells[11].v) : '', // ستون پسورد اختصاصی
+                description: cells[12] ? String(cells[12].v) : '',
+                adminName: cells[13] ? String(cells[13].v) : 'Admin', // ادمین پست‌گذار
+                tags: cells[14] ? String(cells[14].v).split(',').map(t => t.trim()) : ['mod']
             };
         }).filter(item => item.id && item.title).reverse(); 
     } catch (e) { console.error(e); }
@@ -313,11 +309,16 @@ function renderCards(mods) {
         const img3 = mod.image3 || img1;
 
         const cardBox = document.createElement('div');
-        cardBox.className = "stagger-card flex flex-col gap-3"; 
+        cardBox.className = "stagger-card flex flex-col gap-3 relative pt-6"; 
         cardBox.style.animationDelay = `${index * 0.04}s`;
         
         cardBox.innerHTML = `
-            <div class="card-perspective" id="stack-container-${index}">
+            <div class="absolute top-[-25px] left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 dark:bg-slate-900 text-white border border-indigo-500/40 px-4 py-1.5 rounded-full text-xs font-black shadow-lg tracking-wide whitespace-nowrap">
+                ${mod.title}
+                <div class="hanging-string"></div>
+            </div>
+
+            <div class="card-perspective neon-card-flow" id="stack-container-${index}">
                 <div class="img-layer" id="layer-A-${index}" style="z-index: 3; transform: translate(0px, 0px) scale(1); opacity: 1;">
                     <img src="${img1}" class="w-full h-full object-cover select-none">
                 </div>
@@ -329,34 +330,45 @@ function renderCards(mods) {
                 </div>
             </div>
 
-            <div class="mt-2 flex flex-col gap-2 px-1">
-                <h3 class="font-black text-sm dark:text-white text-gray-900 truncate ${currentLang==='fa'?'text-right':'text-left'}">${mod.title}</h3>
-                
-                <div class="flex justify-between items-center rgb-border dark:bg-[#11121c]/80 bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 shadow-sm">
+            <div class="mt-1 flex flex-col gap-2 px-1">
+                <div class="flex justify-between items-center dark:bg-[#11121c]/80 bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 dark:border-white/5 border-black/5 shadow-sm">
                     <div class="flex items-center gap-3 font-medium">
                         <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
-                        <span><i class="fas fa-code-branch text-zoneGlow ml-1"></i>v${mod.version}</span>
+                        <span><i class="fas fa-user-gear text-zoneGlow ml-1"></i>${mod.developer}</span>
+                        <span class="text-indigo-400 font-bold"><i class="fas fa-user-shield ml-1"></i>${mod.adminName}</span>
                     </div>
                     <span class="font-black text-zoneGlow uppercase text-[9px] bg-zoneAccent/10 px-2 py-0.5 rounded-md border border-zoneAccent/20">${mod.brand || mod.category}</span>
                 </div>
             </div>
 
-            <div class="w-full flex gap-2">
-                <button onclick="openInfoModal(event, ${index})" class="w-12 h-12 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-zoneGlow text-base transition-all active:scale-95">
-                    <i class="fas fa-bars-staggered"></i>
+            <div class="w-full flex gap-1.5">
+                <button onclick="openInfoModal(event, ${index})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-gray-400 hover:text-white text-xs transition-all active:scale-95">
+                    <i class="fas fa-info"></i>
                 </button>
                 
-                <a href="${mod.download}" target="_blank" onclick="playSound('click'); event.stopPropagation();" class="btn-launch flex-1 h-12 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2">
+                <button onclick="copyPassword('${mod.password}')" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-amber-500 text-xs transition-all active:scale-95" title="Copy Password">
+                    <i class="fas fa-key"></i>
+                </button>
+
+                <a href="${mod.download}" target="_blank" onclick="playSound('click'); event.stopPropagation();" class="btn-download-unique flex-1 h-10 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2">
                     <i class="fas fa-download text-xs"></i> ${t.downloadMod}
                 </a>
 
-                <button onclick="swapCardImages(${index})" class="w-12 h-12 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-amber-500 text-base transition-all active:scale-95">
+                <button onclick="swapCardImages(${index})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-indigo-400 text-xs transition-all active:scale-95">
                     <i class="fas fa-images"></i>
                 </button>
             </div>
         `;
         grid.appendChild(cardBox);
     });
+}
+
+function copyPassword(pass) {
+    playSound('click');
+    if(!pass) return;
+    navigator.clipboard.writeText(pass).then(() => {
+        // بدون پاپ آپ، کپی کاملاً در پس‌زمینه با هندل صوتی انجام می‌شود
+    }).catch(err => console.log(err));
 }
 
 function swapCardImages(cardIdx) {
@@ -377,7 +389,6 @@ function swapCardImages(cardIdx) {
     }
     
     topLayer.classList.add('slanted-swap-out');
-    
     middleLayer.style.zIndex = "3";
     middleLayer.style.transform = "translate(0px, 0px) scale(1)";
     middleLayer.style.opacity = "1";
@@ -420,15 +431,17 @@ function filterAndRender() {
 function openInfoModal(event, index) {
     playSound('click');
     event.stopPropagation(); 
+    
     const cardContainer = event.currentTarget.closest('.stagger-card');
-    const cardTitle = cardContainer.querySelector('h3').innerText.trim();
-    const mod = allMods.find(m => m.title.trim() === cardTitle);
+    const cardTitle = cardContainer.querySelector('h3') ? cardContainer.querySelector('h3').innerText.trim() : '';
+    
+    // پیدا کردن آیتم از آرایه
+    const mod = allMods[index];
     if(!mod) return;
 
     document.getElementById('infoModalTitle').innerText = mod.title.toUpperCase();
     document.getElementById('infoModalDesc').innerText = mod.description || "...";
-    document.getElementById('infoModalAuthor').innerText = mod.author.name;
-    document.getElementById('infoModalAvatar').src = mod.author.avatar;
+    document.getElementById('infoModalDeveloper').innerText = mod.developer; // انتقال نام سازنده به مودال
     document.getElementById('infoModalCategory').innerText = mod.category;
     
     const tagsBox = document.getElementById('infoModalTags'); tagsBox.innerHTML = '';
@@ -448,7 +461,7 @@ function closeInfoModal() {
 function openLeaderboard() {
     playSound('click');
     const counts = {};
-    allMods.forEach(m => { const name = m.author.name || 'Admin'; counts[name] = (counts[name] || 0) + 1; });
+    allMods.forEach(m => { const name = m.adminName || 'Admin'; counts[name] = (counts[name] || 0) + 1; });
 
     const sortedAdmins = Object.keys(counts).map(name => {
         return { name: name, count: counts[name] };
