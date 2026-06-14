@@ -5,30 +5,67 @@
     "category": "cars",
     "brand": "BMW",
     "image": "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=600&auto=format&fit=crop",
+    "backImage": "https://images.unsplash.com/photo-1616422285623-13ff0162193c?q=80&w=600&auto=format&fit=crop",
     "size": "145 MB",
     "version": "1.0",
     "tags": ["drift", "bmw", "iran"],
-    "download": "https://example.com/download-bmw",
-    "description": "این مود شامل فیزیک شبیه‌سازی شده واقعی برای دریفت، صداگذاری اختصاصی اگزوز و چندین اسکین مختلف بدنه است.",
-    "author": {
-      "name": "Arshia",
-      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Arshia"
-    }
+    "download": "https://example.com/download",
+    "description": "فیزیک بهینه‌شده برای دریفت زاویه بالا، صداگذاری اگزوز اختصاصی و ۵ رنگ مختلف بدنه.",
+    "author": { "name": "Arshia", "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Arshia" }
   },
   {
-    "id": "ikco-samand-shoti",
-    "title": "Samand LX Shoti Spec",
+    "id": "samand-lx-shoti",
+    "title": "IKCO Samand LX Shoti",
     "category": "cars",
     "brand": "IKCO",
-    "image": "https://images.unsplash.com/photo-1542362567-b07e54358753?q=80&w=600&auto=format&fit=crop",
-    "size": "65 MB",
-    "version": "2.1",
-    "tags": ["shoti", "samand", "iranian"],
-    "download": "https://example.com/download-samand",
-    "description": "مود سمند ال‌ایکس شوتی با ارتفاع عقب بالا، فیزیک تعادل مناسب برای جاده‌های ایران و شیشه‌های دودی.",
-    "author": {
-      "name": "Admin_Sina",
-      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Sina"
-    }
+    "image": "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=600&auto=format&fit=crop",
+    "backImage": "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=600&auto=format&fit=crop",
+    "size": "68 MB",
+    "version": "2.0",
+    "tags": ["shoti", "samand", "iran"],
+    "download": "https://example.com/download",
+    "description": "نسخه شوتی سمند LX با تعادل دینامیکی بالا برای سرعت، کمک‌فنرهای تقویت‌شده و شیشه‌های دودی.",
+    "author": { "name": "Sina", "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Sina" }
+  },
+  {
+    "id": "tehran-shariati",
+    "title": "Tehran Shariati Street",
+    "category": "maps",
+    "subcategory": "Iran",
+    "image": "https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=600&auto=format&fit=crop",
+    "backImage": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=600&auto=format&fit=crop",
+    "size": "420 MB",
+    "version": "1.4",
+    "tags": ["tehran", "street", "iran"],
+    "download": "https://example.com/download",
+    "description": "شبیه‌سازی دقیق خیابان شریعتی تهران، لاین‌بندی اتوبوس و نورپردازی بهینه در شب.",
+    "author": { "name": "Ali", "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Ali" }
+  },
+  {
+    "id": "tokyo-highway",
+    "title": "Shutoko Restoration Project",
+    "category": "maps",
+    "subcategory": "Japan",
+    "image": "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?q=80&w=600&auto=format&fit=crop",
+    "backImage": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=600&auto=format&fit=crop",
+    "size": "1.8 GB",
+    "version": "0.9.1",
+    "tags": ["tokyo", "highway", "jdm"],
+    "download": "https://example.com/download",
+    "description": "بزرگراه‌های توکیو با بالاترین کیفیت بافت و پشتیبانی کامل از ترافیک هوش مصنوعی بازی.",
+    "author": { "name": "Admin", "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Admin" }
+  },
+  {
+    "id": "pure-sky-2026",
+    "title": "Pure Graphics Weather Patch",
+    "category": "graphics",
+    "image": "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=600&auto=format&fit=crop",
+    "backImage": "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=600&auto=format&fit=crop",
+    "size": "85 MB",
+    "version": "0.45",
+    "tags": ["csp", "pure", "sky"],
+    "download": "https://example.com/download",
+    "description": "اصلاح سیستم ابری، بازتاب نور روی بدنه ماشین‌ها و اسمان شب تماماً واقع‌گرایانه.",
+    "author": { "name": "Arshia", "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Arshia" }
   }
 ]
