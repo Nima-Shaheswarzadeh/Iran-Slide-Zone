@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ایران اسلاید زون | Premium AC Mod Manager V6</title>
+    <title>ایران اسلاید زون | Premium AC Mod Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -37,6 +37,19 @@
         body { 
             font-family: 'Vazir', sans-serif; 
             transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* انیمیشن روان و لوکس RGB برای بخش‌های گیمینگ */
+        @keyframes rgbGlow {
+            0% { border-color: #ff0055; box-shadow: 0 0 8px rgba(255, 0, 85, 0.15); }
+            33% { border-color: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.15); }
+            66% { border-color: #7000ff; box-shadow: 0 0 8px rgba(112, 0, 255, 0.15); }
+            100% { border-color: #ff0055; box-shadow: 0 0 8px rgba(255, 0, 85, 0.15); }
+        }
+
+        .rgb-border {
+            border: 1px solid #ff0055;
+            animation: rgbGlow 10s linear infinite;
         }
 
         /* پس‌زمینه پویا با غلظت رنگ متفاوت در لایت‌مود */
@@ -120,16 +133,6 @@
         }
         .submenu-open { max-height: 500px; }
 
-        /* انیمیشن پاپ‌آپ ریز ۱ ثانیه‌ای پایین صفحه */
-        #toastNotice {
-            transform: translateY(100px) translateX(-50%);
-            opacity: 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-        }
-        #toastNotice.toast-show {
-            transform: translateY(0) translateX(-50%);
-            opacity: 1;
-        }
-
         .custom-scroll::-webkit-scrollbar { width: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
         .light .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
@@ -139,7 +142,7 @@
 
     <div class="vision-bg"></div>
 
-    <header id="mainHeader" class="border-b dark:border-zoneBorder border-zoneBorderLight dark:bg-zoneBg/80 bg-white/80 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 hidden">
+    <header id="mainHeader" class="border-b rgb-border dark:bg-zoneBg/80 bg-white/80 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 hidden">
         <div class="max-w-[1600px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
@@ -161,7 +164,7 @@
                     </button>
                 </div>
                 <div class="relative w-full sm:w-72">
-                    <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 rounded-xl px-4 py-2 pr-10 text-xs dark:text-white text-gray-900 focus:outline-none focus:border-zoneAccent transition-all">
+                    <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full rgb-border dark:bg-white/5 bg-black/5 rounded-xl px-4 py-2 pr-10 text-xs dark:text-white text-gray-900 focus:outline-none transition-all">
                     <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
                 </div>
             </div>
@@ -169,7 +172,7 @@
     </header>
 
     <section id="welcomePage" class="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 hidden">
-        <div class="max-w-xl dark:bg-zoneGlass bg-white/70 border dark:border-zoneBorder border-zoneBorderLight p-12 rounded-3xl shadow-2xl backdrop-blur-2xl relative overflow-hidden">
+        <div class="max-w-xl rgb-border dark:bg-zoneGlass bg-white/70 p-12 rounded-3xl shadow-2xl backdrop-blur-2xl relative overflow-hidden">
             <span class="text-5xl inline-block mb-4">🏁</span>
             <h2 id="welcomeTitle" class="text-2xl font-black mb-3">ایران اسلاید زون</h2>
             <p id="welcomeDesc" class="text-gray-400 dark:text-gray-400 text-xs leading-relaxed mb-8 font-medium">پلتفرم فوق‌حرفه‌ای و اختصاصی شبیه‌سازی و مدیریت مودهای بهینه شده بازی Assetto Corsa زنده متصل به کلاود بورد.</p>
@@ -189,7 +192,7 @@
     </section>
 
     <section id="galleryPage" class="max-w-[1600px] w-full mx-auto px-6 py-6 hidden flex-1 flex flex-col md:flex-row gap-8">
-        <aside class="w-full md:w-72 dark:bg-zoneGlass bg-white/60 border dark:border-zoneBorder border-zoneBorderLight rounded-3xl p-5 h-auto md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl shadow-sm">
+        <aside class="w-full md:w-72 rgb-border dark:bg-zoneGlass bg-white/60 rounded-3xl p-5 h-auto md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl shadow-sm">
             <div class="flex flex-col gap-2">
                 <h3 class="text-[10px] font-black text-gray-400 mb-2 pb-2.5 border-b dark:border-white/5 border-black/5 flex items-center gap-2 uppercase tracking-widest">
                     <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> ISZ MOD MANAGER
@@ -207,11 +210,6 @@
             <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-12 gap-x-6 pt-6"></div>
         </main>
     </section>
-
-    <div id="toastNotice" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/95 dark:bg-white/95 text-white dark:text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow-xl border dark:border-white/10 border-black/5 z-50 pointer-events-none flex items-center gap-2">
-        <i class="fas fa-circle-info text-indigo-500 text-xs"></i>
-        <span id="toastText">عملیات انجام شد</span>
-    </div>
 
     <div id="infoModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" onclick="closeInfoModal()">
         <div class="dark:bg-[#11121c] bg-white border dark:border-white/10 border-black/10 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl scale-95 transition-all duration-300" id="infoModalContainer" onclick="event.stopPropagation()">
