@@ -3,12 +3,12 @@ let currentCategory = 'latest';
 let currentSubFilter = 'all';
 let openCategoryTree = null;   
 let isMuted = false;
-let currentLang = 'fa'; // 'fa' or 'en'
+let currentLang = 'fa'; 
 let cardImageIndexes = {}; 
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// ترجمه‌های کامل سیستم هاب ایران اسلاید زون طبق نام‌های درخواستی شما
+// پالت بومی و ترجمه زبان ایران اسلاید زون با دکمه دانلود کاملاً تفکیک شده فارسی و انگلیسی
 const locales = {
     fa: {
         title: "ایران اسلاید زون",
@@ -21,16 +21,11 @@ const locales = {
         adminLeaderboard: "🏆 جدول ادمین‌های فعال",
         copyright: "تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.",
         noItem: "هیچ موردی پیدا نشد.",
-        downloadMod: "DOWNLOAD MOD",
+        downloadMod: "دانلود مود پریمیوم", // اصلاح متن به زبان فارسی روان طبق خواسته شما
         specifications: "SPECIFICATIONS",
         modalDesc: "توضیحات و بررسی فنی:",
         modalTags: "تگ‌های متادیتا:",
         modalDev: "توسعه و تست",
-        toastThemeDark: "حالت شب فعال شد 🌙",
-        toastThemeLight: "حالت روز فعال شد ☀️",
-        toastLangFa: "زبان به فارسی تغییر یافت 🇮🇷",
-        toastLangEn: "Language changed to English 🇬🇧",
-        toastSwap: "تصویر استک ورق خورد 🔄",
         activeMods: "مود فعال",
         exitHub: "خروج از هاب"
     },
@@ -50,11 +45,6 @@ const locales = {
         modalDesc: "Technical Description:",
         modalTags: "Metadata Tags:",
         modalDev: "Developer",
-        toastThemeDark: "Dark Mode Activated 🌙",
-        toastThemeLight: "Light Mode Activated ☀️",
-        toastLangFa: "زبان به فارسی تغییر یافت 🇮🇷",
-        toastLangEn: "Language changed to English 🇬🇧",
-        toastSwap: "Card image stacked 🔄",
         activeMods: "Active Mods",
         exitHub: "Exit Mod Hub"
     }
@@ -82,13 +72,6 @@ function playSound(type) {
     } catch (e) { console.log(e); }
 }
 
-function showToast(message) {
-    const toast = document.getElementById('toastNotice');
-    document.getElementById('toastText').innerText = message;
-    toast.classList.add('toast-show');
-    setTimeout(() => { toast.classList.remove('toast-show'); }, 1000); // انیمیشن خودکار خروج دقیقاً بعد از ۱ ثانیه
-}
-
 function toggleThemeMode() {
     playSound('click');
     const html = document.getElementById('htmlTag');
@@ -96,11 +79,9 @@ function toggleThemeMode() {
     if (html.classList.contains('dark')) {
         html.classList.remove('dark');
         icon.className = 'fas fa-sun';
-        showToast(locales[currentLang].toastThemeLight);
     } else {
         html.classList.add('dark');
         icon.className = 'fas fa-moon';
-        showToast(locales[currentLang].toastThemeDark);
     }
 }
 
@@ -118,7 +99,6 @@ function toggleLanguage() {
     }
     
     updateDOMTranslations();
-    showToast(locales[currentLang].toastLangEn);
 }
 
 function updateDOMTranslations() {
@@ -146,7 +126,6 @@ function toggleMute() {
     document.querySelector('#audioToggleBtn i').className = isMuted ? 'fas fa-volume-mute ml-1' : 'fas fa-volume-up ml-1';
 }
 
-// ساختار دقیقاً منطبق با دیتابیس ۴تایی اصیل شما بدون افزونه اضافه
 const mainCategories = [
     { id: 'cars', label: 'Cars Library', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
     { id: 'maps', label: 'Maps Library', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
@@ -158,7 +137,6 @@ const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA";
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
 async function init() {
-    // پیش‌فرض لود اولیه با دارک مود گیمینگ پریمیوم ایران اسلاید زون
     document.getElementById('htmlTag').classList.add('dark'); 
     await fetchModsFromSheets();
     renderCategoriesMenu();
@@ -166,7 +144,6 @@ async function init() {
     handleRouting(); 
 }
 
-// خواندن اطلاعات کاملاً هماهنگ با فرمول جدید: ستون ۶ و ۷ و ۸ برای تصاویر متوالی استک
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -182,7 +159,6 @@ async function fetchModsFromSheets() {
                 category: cells[2] ? String(cells[2].v).toLowerCase().trim() : '',
                 brand: cells[3] ? String(cells[3].v) : '',
                 subcategory: cells[4] ? String(cells[4].v) : '',
-                // ستون‌های ۶، ۷ و ۸ دیتابیس جدید شما برای تخصیص مستقیم به استک سه‌تایی تصویر:
                 image1: cells[5] ? String(cells[5].v) : '',
                 image2: cells[6] ? String(cells[6].v) : '',
                 image3: cells[7] ? String(cells[7].v) : '',
@@ -319,7 +295,6 @@ function showPage(pageId) {
     if (pageId === 'galleryPage') document.getElementById('mainHeader').classList.remove('hidden');
 }
 
-// سیستم رندر متقارن استک فیزیکی مورب تصاویر
 function renderCards(mods) {
     const grid = document.getElementById('modsGrid');
     grid.innerHTML = '';
@@ -333,7 +308,6 @@ function renderCards(mods) {
     mods.forEach((mod, index) => {
         cardImageIndexes[index] = 0;
 
-        // فراخوانی تصاویر پشت سر هم از ستون‌های ۶، ۷ و ۸ دیتابیس جدید شما
         const img1 = mod.image1 || 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400';
         const img2 = mod.image2 || img1;
         const img3 = mod.image3 || img1;
@@ -358,7 +332,7 @@ function renderCards(mods) {
             <div class="mt-2 flex flex-col gap-2 px-1">
                 <h3 class="font-black text-sm dark:text-white text-gray-900 truncate ${currentLang==='fa'?'text-right':'text-left'}">${mod.title}</h3>
                 
-                <div class="flex justify-between items-center dark:bg-[#11121c]/80 bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 dark:border-white/5 border-black/5 shadow-sm">
+                <div class="flex justify-between items-center rgb-border dark:bg-[#11121c]/80 bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 shadow-sm">
                     <div class="flex items-center gap-3 font-medium">
                         <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
                         <span><i class="fas fa-code-branch text-zoneGlow ml-1"></i>v${mod.version}</span>
@@ -385,10 +359,8 @@ function renderCards(mods) {
     });
 }
 
-// الگوریتم انیمیشن فیزیکی کج ورق زدن (Slanted Swap)
 function swapCardImages(cardIdx) {
     playSound('flip');
-    showToast(locales[currentLang].toastSwap);
     
     const layerA = document.getElementById(`layer-A-${cardIdx}`);
     const layerB = document.getElementById(`layer-B-${cardIdx}`);
