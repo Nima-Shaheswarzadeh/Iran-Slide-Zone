@@ -1,12 +1,23 @@
 let allMods = [];
 let currentCategory = 'latest';
 let currentSubFilter = 'all';
-let openCategoryTree = null;   
+let openCategoryTree = {}; // ذخیره وضعیت باز/بسته بودن منوهای سایدبار به صورت مستقل
 let isMuted = false;
 let currentLang = 'fa'; 
 let cardImageIndexes = {}; 
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// لیست ۷ دسته‌بندی اصلی و استاندارد شما با ترجمه دو زبانه و تصاویر مناسب
+const mainCategories = [
+    { id: 'car', labelFa: 'ماشین‌ها', labelEn: 'Cars', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
+    { id: 'map', labelFa: 'نقشه‌ها', labelEn: 'Maps', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
+    { id: 'app', labelFa: 'برنامه‌ها', labelEn: 'Apps / HUD', icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' },
+    { id: 'csp', labelFa: 'تنظیمات CSP', labelEn: 'CSP Presets', icon: '⚙️', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400' },
+    { id: 'driver', labelFa: 'راننده‌ها و لباس', labelEn: 'Drivers & Suits', icon: '🕴️', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=400' },
+    { id: 'server', labelFa: 'سرورها', labelEn: 'Servers', icon: '🖥️', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=400' },
+    { id: 'graphic', labelFa: 'گرافیک و فیلترها', labelEn: 'Graphics & PPFilter', icon: '🌠', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' }
+];
 
 const locales = {
     fa: {
@@ -17,7 +28,7 @@ const locales = {
         audioOff: "صدا: خاموش",
         searchPlaceholder: "جستجو پیشرفته در دیتابیس...",
         latestLabel: "جدیدترین‌ها (۹ پست آخر)",
-        adminLeaderboard: "جدول ادمین‌های فعال",
+        adminLeaderboard: "لیدربرد ادمین ها",
         copyright: "تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.",
         noItem: "هیچ موردی پیدا نشد.",
         downloadMod: "دانلود مود",
@@ -25,7 +36,7 @@ const locales = {
         modalDesc: "توضیحات و بررسی فنی:",
         modalTags: "تگ‌های متادیتا:",
         modalDev: "سازنده مود",
-        activeMods: "مود فعال",
+        activeMods: "پست", // کلمه پست جایگزین مود فعال شد
         exitHub: "خروج از هاب"
     },
     en: {
@@ -44,24 +55,10 @@ const locales = {
         modalDesc: "Technical Description:",
         modalTags: "Metadata Tags:",
         modalDev: "Developer",
-        activeMods: "Active Mods",
+        activeMods: "Post",
         exitHub: "Exit Mod Hub"
     }
 };
-
-// لیست ۷ دسته‌بندی اصلی و دقیق با معادل فارسی طبق فیلد درخواستی
-const mainCategories = [
-    { id: 'car', labelEn: 'Car', labelFa: 'ماشین', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
-    { id: 'map', labelEn: 'Map', labelFa: 'مپ', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
-    { id: 'app', labelEn: 'App', labelFa: 'برنامه', icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' },
-    { id: 'csp', labelEn: 'CSP', labelFa: 'سی اس پی', icon: '🛠️', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' },
-    { id: 'driver', labelEn: 'Driver', labelFa: 'راننده', icon: '👤', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=400' },
-    { id: 'server', labelEn: 'Server', labelFa: 'سرور', icon: '🖥️', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=400' },
-    { id: 'graphic', labelEn: 'Graphic', labelFa: 'گرافیک', icon: '🌠', img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400' }
-];
-
-const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA"; 
-const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
 function playSound(type) {
     if (isMuted) return;
@@ -138,15 +135,19 @@ function toggleMute() {
     document.querySelector('#audioToggleBtn i').className = isMuted ? 'fas fa-volume-mute ml-1' : 'fas fa-volume-up ml-1';
 }
 
+const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA"; 
+const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+
 async function init() {
     document.getElementById('htmlTag').classList.add('dark'); 
+    mainCategories.forEach(c => openCategoryTree[c.id] = false); // ریست وضعیت فولدرها
     await fetchModsFromSheets();
     renderCategoriesMenu();
     window.addEventListener('hashchange', handleRouting);
     handleRouting(); 
 }
 
-// اصلاح و فیکس دقیق مرتب‌سازی ستون‌های گوگل شیت بر اساس چیدمان تصویر شما
+// 🎯 آنالیز چیدمان جدید و دقیق ۱۵ ستون گوگل شیت شما بدون پس و پیش شدن اطلاعات
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -166,12 +167,12 @@ async function fetchModsFromSheets() {
                 image2: cells[6] ? String(cells[6].v) : '',
                 image3: cells[7] ? String(cells[7].v) : '',
                 size: cells[8] ? String(cells[8].v) : '',
-                developer: cells[9] ? String(cells[9].v) : 'Unknown', // ستون سازنده مود
-                download: cells[10] ? String(cells[10].v) : '#',
-                password: cells[11] ? String(cells[11].v) : '', // ستون رمز عبور واقعی
-                description: cells[12] ? String(cells[12].v) : '', // ستون توضیحات واقعی
-                adminName: cells[13] ? String(cells[13].v) : 'Admin', // ادمین پست‌گذار
-                tags: cells[14] ? String(cells[14].v).split(',').map(t => t.trim()) : ['mod']
+                creator: cells[9] ? String(cells[9].v) : 'Unknown', // ستون 9 سازنده مود
+                download: cells[10] ? String(cells[10].v) : '#',     // ستون 10 لینک دانلود
+                description: cells[11] ? String(cells[11].v) : '',  // ستون 11 توضیحات فنی
+                adminName: cells[12] ? String(cells[12].v) : 'Admin', // ستون 12 ادمین پست‌گذار
+                tags: cells[13] ? String(cells[13].v).split(',').map(t => t.trim()) : ['mod'], // ستون 13 تگ‌ها
+                password: cells[14] ? String(cells[14].v) : ''       // ستون 14 پسورد اختصاصی فایل
             };
         }).filter(item => item.id && item.title).reverse(); 
     } catch (e) { console.error(e); }
@@ -181,13 +182,13 @@ function renderCategoriesMenu() {
     const grid = document.getElementById('categoriesMenuGrid');
     grid.innerHTML = '';
     mainCategories.forEach(cat => {
-        const label = currentLang === 'fa' ? cat.labelFa : cat.labelEn;
+        const currentTitle = currentLang === 'fa' ? cat.labelFa : cat.labelEn;
         grid.innerHTML += `
-            <div onclick="navigateTo('gallery', '${cat.id}')" class="sidebar-folder relative h-36 rounded-2xl overflow-hidden cursor-pointer group dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 hover:scale-[1.02]">
-                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-10 dark:opacity-5 group-hover:opacity-25 transition-all duration-500 blur-[0.2px]">
-                <div class="absolute inset-0 bg-gradient-to-t dark:from-zoneBg from-white via-transparent to-transparent flex flex-col justify-end p-4">
-                    <span class="text-xl mb-1">${cat.icon}</span>
-                    <h3 class="font-black text-xs tracking-wide">${label}</h3>
+            <div onclick="navigateTo('gallery', '${cat.id}')" class="sidebar-folder relative h-44 rounded-2xl overflow-hidden cursor-pointer group dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 hover:scale-[1.02] shadow-sm transition-all duration-300">
+                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-10 dark:opacity-10 group-hover:opacity-30 transition-all duration-500 blur-[0.2px]">
+                <div class="absolute inset-0 bg-gradient-to-t dark:from-zoneBg from-white via-transparent to-transparent flex flex-col justify-end p-5">
+                    <span class="text-3xl mb-2">${cat.icon}</span>
+                    <h3 class="font-black text-sm tracking-wide">${currentTitle}</h3>
                 </div>
             </div>
         `;
@@ -211,14 +212,14 @@ function renderExplorerTree() {
 
     mainCategories.forEach(cat => {
         const isCurrentCat = (currentCategory === cat.id);
-        const isOpen = (openCategoryTree === cat.id);
+        const isOpen = openCategoryTree[cat.id];
         const catClass = (isCurrentCat && currentSubFilter === 'all') ? 'bg-black/5 dark:bg-white/5 text-zoneGlow font-black border-r-2 border-zoneAccent' : 'text-gray-400 hover:bg-black/5 dark:hover:bg-white/5';
-        const label = currentLang === 'fa' ? cat.labelFa : cat.labelEn;
+        const currentTitle = currentLang === 'fa' ? cat.labelFa : cat.labelEn;
 
         let subItemsHtml = '';
         let subs = [];
         if (cat.id === 'car') subs = [...new Set(allMods.filter(m => m.category === 'car').map(m => m.brand))].filter(Boolean);
-        if (cat.id === 'map') subs = [...new Set(allMods.filter(m => m.category === 'map').map(m => m.subcategory))].filter(Boolean);
+        else subs = [...new Set(allMods.filter(m => m.category === cat.id).map(m => m.subcategory))].filter(Boolean);
 
         if (subs.length > 0) {
             subItemsHtml = `<div class="submenu-transition ${isOpen ? 'submenu-open' : ''} flex flex-col pr-4 my-1 border-r dark:border-white/5 border-black/5 mr-2 gap-1">`;
@@ -239,13 +240,17 @@ function renderExplorerTree() {
             subItemsHtml += `</div>`;
         }
 
+        // توسعه سیستم فلش جداگانه جهت عدم تداخل باز کردن کشو با فیلتر کلی دسته بندی
         treeContainer.innerHTML += `
             <div class="flex flex-col">
-                <div onclick="toggleTreeFolder('${cat.id}')" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all ${catClass}">
-                    <div class="flex items-center gap-2.5">
-                        <span class="text-xs opacity-80">${cat.icon}</span> <span>${label}</span>
+                <div class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all ${catClass}">
+                    <div onclick="navigateTo('gallery', '${cat.id}', 'all')" class="flex items-center gap-2.5 flex-1">
+                        <span class="text-xs opacity-80">${cat.icon}</span> <span>${currentTitle}</span>
                     </div>
-                    <i class="fas ${isOpen ? 'fa-angle-down' : 'fa-angle-left'} text-[9px] opacity-40"></i>
+                    ${subs.length > 0 ? `
+                    <div onclick="toggleTreeFolder(event, '${cat.id}')" class="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-all">
+                        <i class="fas ${isOpen ? 'fa-angle-down' : 'fa-angle-left'} text-[10px] opacity-60"></i>
+                    </div>` : ''}
                 </div>
                 ${subItemsHtml}
             </div>
@@ -253,14 +258,11 @@ function renderExplorerTree() {
     });
 }
 
-function toggleTreeFolder(catId) {
-    if (openCategoryTree === catId) {
-        openCategoryTree = null;
-        navigateTo('gallery', catId, 'all');
-    } else {
-        openCategoryTree = catId;
-        navigateTo('gallery', catId, 'all');
-    }
+function toggleTreeFolder(event, catId) {
+    event.stopPropagation(); // جلوگیری از اجرای کلیک دسته بندی اصلی
+    playSound('click');
+    openCategoryTree[catId] = !openCategoryTree[catId];
+    renderExplorerTree();
 }
 
 function handleRouting() {
@@ -271,7 +273,7 @@ function handleRouting() {
         const parts = hash.split('/');
         currentCategory = parts[1] || 'latest';
         currentSubFilter = parts[2] || 'all';
-        if(currentCategory !== 'latest') openCategoryTree = currentCategory;
+        if(currentCategory !== 'latest') openCategoryTree[currentCategory] = true;
         showPage('galleryPage');
         renderExplorerTree();
         filterAndRender();
@@ -308,8 +310,10 @@ function renderCards(mods) {
         return;
     }
 
-    mods.forEach((mod, index) => {
-        cardImageIndexes[index] = 0;
+    mods.forEach((mod) => {
+        // پیدا کردن ایندکس واقعی از آرایه کل به جهت ارجاع بی نقص عکس‌ها و مودال
+        const trueGlobalIndex = allMods.findIndex(m => m.id === mod.id);
+        cardImageIndexes[trueGlobalIndex] = 0;
 
         const img1 = mod.image1 || 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400';
         const img2 = mod.image2 || img1;
@@ -317,22 +321,22 @@ function renderCards(mods) {
 
         const cardBox = document.createElement('div');
         cardBox.className = "stagger-card flex flex-col gap-3 relative pt-6"; 
-        cardBox.style.animationDelay = `${index * 0.04}s`;
+        cardBox.style.animationDelay = `0.02s`;
         
         cardBox.innerHTML = `
-            <div class="absolute top-[-25px] left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 dark:bg-slate-900 text-white border border-indigo-500/40 px-4 py-1.5 rounded-full text-xs font-black shadow-lg tracking-wide whitespace-nowrap">
+            <div class="absolute top-[-25px] left-1/2 -translate-x-1/2 z-20 bg-slate-900 dark:bg-slate-950 text-white border border-indigo-500/40 px-4 py-1.5 rounded-full text-xs font-black shadow-lg tracking-wide whitespace-nowrap">
                 ${mod.title}
                 <div class="hanging-string"></div>
             </div>
 
-            <div class="card-perspective neon-card-flow" id="stack-container-${index}">
-                <div class="img-layer" id="layer-A-${index}" style="z-index: 3; transform: translate(0px, 0px) scale(1); opacity: 1;">
+            <div class="card-perspective neon-card-flow" id="stack-container-${trueGlobalIndex}">
+                <div class="img-layer" id="layer-A-${trueGlobalIndex}" style="z-index: 3; transform: translate(0px, 0px) scale(1); opacity: 1;">
                     <img src="${img1}" class="w-full h-full object-cover select-none">
                 </div>
-                <div class="img-layer" id="layer-B-${index}" style="z-index: 2; transform: translate(-10px, -10px) rotate(1.5deg) scale(0.97); opacity: 0.65;">
+                <div class="img-layer" id="layer-B-${trueGlobalIndex}" style="z-index: 2; transform: translate(-10px, -10px) rotate(1.5deg) scale(0.97); opacity: 0.65;">
                     <img src="${img2}" class="w-full h-full object-cover select-none">
                 </div>
-                <div class="img-layer" id="layer-C-${index}" style="z-index: 1; transform: translate(-20px, -20px) rotate(3deg) scale(0.94); opacity: 0.35;">
+                <div class="img-layer" id="layer-C-${trueGlobalIndex}" style="z-index: 1; transform: translate(-20px, -20px) rotate(3deg) scale(0.94); opacity: 0.35;">
                     <img src="${img3}" class="w-full h-full object-cover select-none">
                 </div>
             </div>
@@ -348,11 +352,11 @@ function renderCards(mods) {
             </div>
 
             <div class="w-full flex gap-1.5">
-                <button onclick="openInfoModal(event, ${index})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-gray-400 hover:text-white text-xs transition-all active:scale-95">
+                <button onclick="openInfoModal(event, ${trueGlobalIndex})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-gray-400 hover:text-white text-xs transition-all active:scale-95">
                     <i class="fas fa-info"></i>
                 </button>
                 
-                <button onclick="copyPassword('${mod.password}')" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-amber-500 text-xs transition-all active:scale-95" title="Copy Password">
+                <button onclick="copyPassword(event, '${mod.password}')" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-amber-500 text-xs transition-all active:scale-95" title="Copy Password">
                     <i class="fas fa-key"></i>
                 </button>
 
@@ -360,7 +364,7 @@ function renderCards(mods) {
                     <i class="fas fa-download text-xs"></i> ${t.downloadMod}
                 </a>
 
-                <button onclick="swapCardImages(${index})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-indigo-400 text-xs transition-all active:scale-95">
+                <button onclick="swapCardImages(${trueGlobalIndex})" class="w-10 h-10 dark:bg-white/5 bg-black/5 hover:bg-black/10 dark:hover:bg-white/10 border dark:border-white/5 border-black/5 rounded-xl flex items-center justify-center text-indigo-400 text-xs transition-all active:scale-95">
                     <i class="fas fa-images"></i>
                 </button>
             </div>
@@ -369,12 +373,14 @@ function renderCards(mods) {
     });
 }
 
-function copyPassword(pass) {
+// کپی کردن فیلد پسورد به صورت کاملاً ایزوله بدون دستکاری دیتاهای دیگر شیت
+function copyPassword(event, pass) {
+    event.stopPropagation();
     playSound('click');
-    if(!pass || pass === "undefined") return;
+    if(!pass) return;
     navigator.clipboard.writeText(pass).then(() => {
-        // عملیات کاملاً بی صدا و پس‌زمینه بدون پاپ آپ مزاحم
-    }).catch(err => console.log(err));
+        // کپی بی نقص در پس زمینه بدون مزاحمت اعلان ها انجام پذیرفت.
+    }).catch(err => console.error(err));
 }
 
 function swapCardImages(cardIdx) {
@@ -434,18 +440,18 @@ function filterAndRender() {
     renderCards(filtered);
 }
 
+// 🎯 پاپ آپ پایش فنی اطلاعات (سازنده اصلی مود و تگ‌ها فقط درون این منو رندر می‌شوند)
 function openInfoModal(event, index) {
     playSound('click');
     event.stopPropagation(); 
     
-    // دریافت دقیق آبجکت جاری بر اساس ایندکس فیلتر شده کارت
     const mod = allMods[index];
     if(!mod) return;
 
     document.getElementById('infoModalTitle').innerText = mod.title.toUpperCase();
     document.getElementById('infoModalDesc').innerText = mod.description || "...";
-    document.getElementById('infoModalDeveloper').innerText = mod.developer; // سازنده اصلی مود فقط در اینجا نمایش داده می‌شود
-    document.getElementById('infoModalCategory').innerText = mod.category;
+    document.getElementById('infoModalCreator').innerText = mod.creator; // نمایش نام دقیق سازنده (Creator) ستون ۹
+    document.getElementById('infoModalCategory').innerText = mod.category.toUpperCase();
     
     const tagsBox = document.getElementById('infoModalTags'); tagsBox.innerHTML = '';
     mod.tags.forEach(t => {
