@@ -16,9 +16,7 @@
                         zoneBgLight: '#f8fafc',
                         zoneGlass: 'rgba(18, 20, 36, 0.65)',
                         zoneGlassLight: 'rgba(255, 255, 255, 0.75)',
-                        zoneBorder: 'rgba(255, 255, 255, 0.04)',
-                        zoneBorderLight: 'rgba(0, 0, 0, 0.06)',
-                        zoneAccent: '#4f46e5',
+                        zoneAccent: '#6366f1',
                         zoneGlow: '#818cf8'
                     }
                 }
@@ -26,7 +24,8 @@
         }
     </script>
     <style>
-        @import url('https://v1.fontapi.ir/css/Vazir');
+        /* تزریق فونت بسیار زیبای ایران یکان برای حذف خشکی متن‌ها */
+        @import url('https://v1.fontapi.ir/css/Yekan');
         
         * {
             box-sizing: border-box;
@@ -35,74 +34,63 @@
         }
         
         body { 
-            font-family: 'Vazir', sans-serif; 
+            font-family: 'Yekan', 'Segoe UI', sans-serif; 
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* انیمیشن روان و لوکس RGB برای بخش‌های گیمینگ */
-        @keyframes rgbGlow {
-            0% { border-color: #ff0055; box-shadow: 0 0 8px rgba(255, 0, 85, 0.15); }
-            33% { border-color: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.15); }
-            66% { border-color: #7000ff; box-shadow: 0 0 8px rgba(112, 0, 255, 0.15); }
-            100% { border-color: #ff0055; box-shadow: 0 0 8px rgba(255, 0, 85, 0.15); }
+        /* انیمیشن جریان خطی نئونی (Google Style Line Animation) */
+        @keyframes neonFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .rgb-border {
-            border: 1px solid #ff0055;
-            animation: rgbGlow 10s linear infinite;
+        .neon-line-border {
+            position: relative;
+            background: linear-gradient(90deg, #ff0055, #00ffcc, #7000ff, #ff0055);
+            background-size: 300% 300%;
+            animation: neonFlow 6s ease infinite;
         }
 
-        /* پس‌زمینه پویا با غلظت رنگ متفاوت در لایت‌مود */
-        .vision-bg {
-            position: fixed; inset: -50%;
-            background: radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.06) 0%, transparent 45%),
-                        radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 50%);
-            animation: cosmicShift 30s ease-in-out infinite alternate;
-            z-index: -1; pointer-events: none;
-        }
-        .dark .vision-bg {
-            background: radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.07) 0%, transparent 45%),
-                        radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, rgba(6, 7, 13, 1) 0%, transparent 100%);
-        }
-        @keyframes cosmicShift {
-            0% { transform: rotate(0deg) scale(1); }
-            100% { transform: rotate(4deg) scale(1.03); }
+        /* استایل اختصاصی نخ فانتزی متصل کننده عنوان به اسلایدر */
+        .hanging-string {
+            position: absolute;
+            bottom: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 16px;
+            background: linear-gradient(to bottom, #6366f1, #00ffcc);
+            z-index: 10;
         }
 
-        /* ساختار فیزیکی سه بعدی استک ۳ عکسی */
         .card-perspective {
             position: relative;
             width: 100%;
             height: 215px;
+            padding: 3px;
+            border-radius: 1.5rem;
         }
         
-        .img-layer {
-            position: absolute; inset: 0; width: 100%; height: 100%;
-            border-radius: 1.25rem; overflow: hidden;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            background: #11121c;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.4s ease, z-index 0s;
-        }
-        .light .img-layer {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            background: #e2e8f0;
+        /* افکت نئونی متحرک دور اسلایدر تصاویر */
+        .neon-card-flow {
+            background: linear-gradient(135deg, #ff0055, #00ffcc, #7000ff, #ff0055);
+            background-size: 400% 400%;
+            animation: neonFlow 8s linear infinite;
         }
 
-        /* انیمیشن اصلی پرتاب مورب کجکی (Slanted Swap) */
+        .img-layer {
+            position: absolute; inset: 3px; 
+            border-radius: 1.3rem; overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+            background: #11121c;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.4s ease;
+        }
+
         .slanted-swap-out {
             transform: translate(120%, -20%) rotate(14deg) scale(0.88) !important;
             opacity: 0 !important;
         }
-
-        .img-layer::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
-            transform: translateX(-100%); transition: transform 0.6s ease; pointer-events: none;
-        }
-        .card-perspective:hover .img-layer::after { transform: translateX(100%); }
 
         .stagger-card {
             opacity: 0; transform: translateY(25px);
@@ -110,21 +98,19 @@
         }
         @keyframes cardEntrance { to { opacity: 1; transform: translateY(0); } }
 
-        .btn-launch {
-            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-            position: relative; overflow: hidden;
-            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3), inset 0 1px 1px rgba(255,255,255,0.15);
-            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+        /* دکمه اختصاصی و متمایز دانلود */
+        .btn-download-unique {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.25s ease;
         }
-        .btn-launch:hover {
-            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+        .btn-download-unique:hover {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
         }
-        .btn-launch:active { transform: scale(0.96); }
 
         .sidebar-folder {
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            transition: all 0.3s ease;
         }
 
         .submenu-transition {
@@ -135,14 +121,13 @@
 
         .custom-scroll::-webkit-scrollbar { width: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
-        .light .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between dark:bg-zoneBg bg-zoneBgLight dark:text-gray-100 text-gray-800 transition-colors duration-300">
 
-    <div class="vision-bg"></div>
+    <div class="h-[3px] w-full neon-line-border z-50"></div>
 
-    <header id="mainHeader" class="border-b rgb-border dark:bg-zoneBg/80 bg-white/80 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 hidden">
+    <header id="mainHeader" class="dark:bg-zoneBg/80 bg-white/80 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 hidden border-b dark:border-white/5 border-black/5">
         <div class="max-w-[1600px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
@@ -163,22 +148,24 @@
                         EN
                     </button>
                 </div>
-                <div class="relative w-full sm:w-72">
-                    <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full rgb-border dark:bg-white/5 bg-black/5 rounded-xl px-4 py-2 pr-10 text-xs dark:text-white text-gray-900 focus:outline-none transition-all">
-                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                <div class="relative w-full sm:w-72 p-[1px] rounded-xl neon-line-border">
+                    <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full dark:bg-[#06070d] bg-white rounded-xl px-4 py-2 pr-10 text-xs dark:text-white text-gray-900 focus:outline-none transition-all">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
                 </div>
             </div>
         </div>
     </header>
 
     <section id="welcomePage" class="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 hidden">
-        <div class="max-w-xl rgb-border dark:bg-zoneGlass bg-white/70 p-12 rounded-3xl shadow-2xl backdrop-blur-2xl relative overflow-hidden">
-            <span class="text-5xl inline-block mb-4">🏁</span>
-            <h2 id="welcomeTitle" class="text-2xl font-black mb-3">ایران اسلاید زون</h2>
-            <p id="welcomeDesc" class="text-gray-400 dark:text-gray-400 text-xs leading-relaxed mb-8 font-medium">پلتفرم فوق‌حرفه‌ای و اختصاصی شبیه‌سازی و مدیریت مودهای بهینه شده بازی Assetto Corsa زنده متصل به کلاود بورد.</p>
-            <button onclick="navigateTo('categories')" id="welcomeBtn" class="btn-launch text-white font-black px-12 py-4 rounded-xl text-xs tracking-wider transition-all">
-                LAUNCH MOD HUB <i class="fas fa-chevron-left mr-2"></i>
-            </button>
+        <div class="max-w-xl p-[2px] rounded-3xl neon-line-border">
+            <div class="dark:bg-zoneBg bg-white p-12 rounded-3xl shadow-2xl backdrop-blur-2xl">
+                <span class="text-5xl inline-block mb-4">🏁</span>
+                <h2 id="welcomeTitle" class="text-2xl font-black mb-3">ایران اسلاید زون</h2>
+                <p id="welcomeDesc" class="text-gray-400 dark:text-gray-400 text-xs leading-relaxed mb-8 font-medium">پلتفرم فوق‌حرفه‌ای و اختصاصی شبیه‌سازی و مدیریت مودهای بهینه شده بازی Assetto Corsa زنده متصل به کلاود بورد.</p>
+                <button onclick="navigateTo('categories')" id="welcomeBtn" class="btn-launch text-white font-black px-12 py-4 rounded-xl text-xs tracking-wider transition-all">
+                    LAUNCH MOD HUB <i class="fas fa-chevron-left mr-2"></i>
+                </button>
+            </div>
         </div>
     </section>
 
@@ -192,22 +179,24 @@
     </section>
 
     <section id="galleryPage" class="max-w-[1600px] w-full mx-auto px-6 py-6 hidden flex-1 flex flex-col md:flex-row gap-8">
-        <aside class="w-full md:w-72 rgb-border dark:bg-zoneGlass bg-white/60 rounded-3xl p-5 h-auto md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl shadow-sm">
-            <div class="flex flex-col gap-2">
-                <h3 class="text-[10px] font-black text-gray-400 mb-2 pb-2.5 border-b dark:border-white/5 border-black/5 flex items-center gap-2 uppercase tracking-widest">
-                    <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> ISZ MOD MANAGER
-                </h3>
-                <div id="explorerTree" class="flex flex-col gap-1.5"></div>
-            </div>
-            <div class="pt-3 border-t dark:border-white/5 border-black/5">
-                <button onclick="openLeaderboard()" id="sideLeaderboardBtn" class="w-full py-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
-                    <i class="fas fa-trophy text-xs animate-bounce"></i> <span>🏆 جدول ادمین‌های فعال</span>
-                </button>
-            </div>
-        </aside>
+        <div class="w-full md:w-72 p-[1px] rounded-3xl neon-line-border h-auto md:h-[calc(100vh-140px)] sticky top-24">
+            <aside class="w-full h-full dark:bg-zoneBg bg-white rounded-3xl p-5 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl shadow-sm">
+                <div class="flex flex-col gap-2">
+                    <h3 class="text-[10px] font-black text-gray-400 mb-2 pb-2.5 border-b dark:border-white/5 border-black/5 flex items-center gap-2 uppercase tracking-widest">
+                        <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> ISZ MOD MANAGER
+                    </h3>
+                    <div id="explorerTree" class="flex flex-col gap-1.5"></div>
+                </div>
+                <div class="pt-3 border-t dark:border-white/5 border-black/5">
+                    <button onclick="openLeaderboard()" id="sideLeaderboardBtn" class="w-full py-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fas fa-trophy text-xs animate-bounce"></i> <span>جدول ادمین‌های فعال</span>
+                    </button>
+                </div>
+            </aside>
+        </div>
 
         <main class="flex-1">
-            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-12 gap-x-6 pt-6"></div>
+            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-20 gap-x-6 pt-12"></div>
         </main>
     </section>
 
@@ -228,8 +217,7 @@
                 </div>
                 <div class="flex items-center justify-between border-t dark:border-white/5 border-black/5 pt-4 text-[11px]">
                     <div class="flex items-center gap-2">
-                        <img id="infoModalAvatar" class="w-5 h-5 rounded-full bg-gray-200" src="">
-                        <span class="text-gray-500"><span id="modalAuthorTitle">توسعه و تست</span>: <strong id="infoModalAuthor" class="dark:text-white text-gray-900"></strong></span>
+                        <span class="text-gray-500"><span id="modalDevTitle">سازنده مود</span>: <strong id="infoModalDeveloper" class="dark:text-white text-gray-900"></strong></span>
                     </div>
                     <span id="infoModalCategory" class="text-zoneGlow font-black bg-zoneAccent/10 px-2.5 py-1 rounded-md uppercase border border-zoneAccent/20"></span>
                 </div>
