@@ -1,23 +1,175 @@
-function generateJSON() {
-    const tagsInput = document.getElementById('tags').value;
-    const tagsArray = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
-    
-    const modObject = {
-        id: document.getElementById('id').value,
-        title: document.getElementById('title').value,
-        category: document.getElementById('category').value,
-        brand: document.getElementById('category').value === 'cars' ? prompt("نام برند ماشین را وارد کنید (مثال: BMW):") : "",
-        image: document.getElementById('image').value,
-        size: document.getElementById('size').value,
-        version: document.getElementById('version').value,
-        tags: tagsArray,
-        download: document.getElementById('download').value,
-        description: prompt("توضیحات متنی مود را جهت نمایش در پاپ‌آپ وارد کنید:"),
-        author: {
-            name: prompt("نام خود را به عنوان نویسنده وارد کنید:"),
-            avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${Math.random()}`
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iran Slide Zone | پنل تولید آسان داده ادمین</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://v1.fontapi.ir/css/Vazir');
+        body { font-family: 'Vazir', sans-serif; background-color: #0b0f19; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen p-4 md:p-8 flex items-center justify-center">
+
+    <div class="max-w-2xl w-full bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
+        <div class="flex items-center gap-3 border-b border-gray-800 pb-4 mb-6">
+            <span class="text-2xl">🛠️</span>
+            <div>
+                <h2 class="text-lg font-bold text-orange-400">پنل مدیریت محتوای Iran Slide Zone</h2>
+                <p class="text-xs text-gray-500 mt-0.5">فرم تولید ساختار داده استاندارد برای فایل mods.json</p>
+            </div>
+        </div>
+        
+        <form id="modForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">نام کامل مود</label>
+                    <input type="text" id="title" placeholder="مثال: BMW M3 E92 Drift" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">شناسه یکتا (انگلیسی با خط تیره)</label>
+                    <input type="text" id="id" placeholder="مثال: bmw-m3-e92-drift" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all font-mono">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">دسته‌بندی اصلی</label>
+                    <select id="category" onchange="toggleBrandInput()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all">
+                        <option value="cars">Cars 🚗 (ماشین)</option>
+                        <option value="maps">Maps 🗺️ (نقشه)</option>
+                        <option value="csp">CSP 👨‍💻 (پلاگین)</option>
+                        <option value="graphics">Graphics 🌠 (گرافیک)</option>
+                        <option value="servers">Servers 🌐 (سرور)</option>
+                        <option value="apps">Apps 📲 (برنامه)</option>
+                    </select>
+                </div>
+                <div id="brandWrapper">
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">برند ماشین (اتوگالری)</label>
+                    <input type="text" id="brand" placeholder="مثال: BMW، IKCO، Saipa، Porsche" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">حجم فایل</label>
+                    <input type="text" id="size" placeholder="مثال: 145 MB یا 1.2 GB" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">نسخه مود</label>
+                    <input type="text" id="version" value="1.0" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all font-mono">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">نام نویسنده / ادمین پست</label>
+                    <input type="text" id="authorName" placeholder="مثال: Arshia" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5">تگ‌ها (با کامای انگلیسی , جدا کنید)</label>
+                    <input type="text" id="tags" placeholder="مثال: drift, iran, bmw" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5">آدرس اینترنتی تصویر کاور</label>
+                <input type="url" id="image" placeholder="https://example.com/image.jpg" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all font-mono">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5">لینک مستقیم دانلود فایل مود</label>
+                <input type="url" id="download" placeholder="https://storage.com/modfile.zip" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all font-mono">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1.5">توضیحات تکمیلی مود (نمایش در پاپ‌آپ)</label>
+                <textarea id="description" rows="3" placeholder="توضیحات فیزیک، هندلینگ، تغییرات گرافیکی یا نکات نصب را اینجا بنویسید..." required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-4 text-sm focus:outline-none focus:border-orange-500 transition-all resize-none"></textarea>
+            </div>
+
+            <button type="button" onclick="generateJSON()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-orange-600/10 text-sm">
+                <i class="fas fa-code ml-2"></i>تولید ساختار JSON مود جدید
+            </button>
+        </form>
+
+        <div class="mt-6 border-t border-gray-800 pt-6">
+            <div class="flex justify-between items-center mb-2">
+                <label class="text-xs font-bold text-gray-400">کد خروجی نهایی</label>
+                <button onclick="copyToClipboard()" class="text-xs text-orange-400 hover:text-orange-300 transition-all"><i class="fas fa-copy ml-1"></i>کپی کردن متن</button>
+            </div>
+            <textarea id="jsonOutput" readonly placeholder="کد تولید شده اینجا نمایش داده می‌شود..." class="w-full h-40 bg-gray-950 border border-gray-800 rounded-xl p-4 font-mono text-xs text-emerald-400 focus:outline-none resize-none select-all" dir="ltr"></textarea>
+            <p class="text-[11px] text-gray-500 mt-2 text-right">💡 راهنما: متن بالا را کپی کرده، فایل <code class="bg-gray-950 px-1 py-0.5 rounded text-gray-400 font-mono">data/mods.json</code> خود را در گیت‌هاب باز کنید، یک کاما (<code class="text-orange-400 font-bold">,</code>) به انتهای آخرین آبجکت اضافه کنید و این متن را پیست کنید.</p>
+        </div>
+    </div>
+
+    <script>
+        // فعال یا غیرفعال کردن فیلد برند بر اساس دسته‌بندی ماشین
+        function toggleBrandInput() {
+            const category = document.getElementById('category').value;
+            const brandWrapper = document.getElementById('brandWrapper');
+            if (category === 'cars') {
+                brandWrapper.style.opacity = '1';
+                brandWrapper.style.pointerEvents = 'auto';
+            } else {
+                brandWrapper.style.opacity = '0.4';
+                brandWrapper.style.pointerEvents = 'none';
+                document.getElementById('brand').value = '';
+            }
         }
-    };
-    
-    document.getElementById('jsonOutput').value = ",\n" + JSON.stringify(modObject, null, 2);
-}
+
+        // پردازش فرم و تولید خروجی JSON کامپکت شده
+        function generateJSON() {
+            // بررسی پر بودن فیلدهای اجباری فرم
+            const requiredFields = ['id', 'title', 'size', 'version', 'image', 'download', 'description', 'authorName'];
+            for (let fieldId of requiredFields) {
+                if (!document.getElementById(fieldId).value.trim()) {
+                    alert('لطفاً تمامی فیلدهای فرم را با دقت پر کنید.');
+                    return;
+                }
+            }
+
+            const category = document.getElementById('category').value;
+            const tagsInput = document.getElementById('tags').value;
+            const tagsArray = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
+            
+            // نمونه تصادفی آیکون آواتار بر اساس نام نویسنده
+            const authorSeed = encodeURIComponent(document.getElementById('authorName').value);
+            
+            const modObject = {
+                id: document.getElementById('id').value.trim(),
+                title: document.getElementById('title').value.trim(),
+                category: category,
+                brand: category === 'cars' ? (document.getElementById('brand').value.trim() || "سایر") : "",
+                image: document.getElementById('image').value.trim(),
+                size: document.getElementById('size').value.trim(),
+                version: document.getElementById('version').value.trim(),
+                tags: tagsArray,
+                download: document.getElementById('download').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                author: {
+                    name: document.getElementById('authorName').value.trim(),
+                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${authorSeed}`
+                }
+            };
+            
+            // تولید خروجی به فرمت JSON با دو کاراکتر فاصله برای خوانایی ادمین
+            document.getElementById('jsonOutput').value = JSON.stringify(modObject, null, 2);
+        }
+
+        // سیستم کپی سریع کدهای خروجی
+        function copyToClipboard() {
+            const output = document.getElementById('jsonOutput');
+            if(!output.value) return;
+            
+            output.select();
+            document.execCommand('copy');
+            alert('کد JSON با موفقیت در کلیپ‌بورد کپی شد.');
+        }
+
+        // اجرای اولیه کنترل وضعیت فیلدها در لود ابتدایی صفحه
+        window.addEventListener('DOMContentLoaded', toggleBrandInput);
+    </script>
+</body>
+</html>
