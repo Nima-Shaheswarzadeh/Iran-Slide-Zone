@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>پنل ادمین | تولید کد مود</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>@import url('https://v1.fontapi.ir/css/Vazir'); body{font-family:'Vazir',sans-serif;}</style>
+</head>
+<body class="bg-gray-950 text-gray-100 p-6">
+    <div class="max-w-2xl mx-auto bg-gray-900 p-6 rounded-2xl border border-gray-800">
+        <h2 class="text-xl font-bold mb-6 text-orange-500">🛠️ فرم تولید ساختار داده مود جدید</h2>
+        
+        <form id="modForm" class="space-y-4">
+            <div>
+                <label class="block text-sm mb-1">نام مود (مثال: BMW M3 E92)</label>
+                <input type="text" id="title" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:outline-none focus:border-orange-500">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm mb-1">دسته‌بندی</label>
+                    <select id="category" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:outline-none">
+                        <option value="cars">Cars 🚗</option>
+                        <option value="maps">Maps 🗺️</option>
+                        <option value="csp">CSP 👨‍💻</option>
+                        <option value="graphics">Graphics 🌠</option>
+                        <option value="servers">Servers 🌐</option>
+                        <option value="apps">Apps 📲</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1">شناسه یکتا (به انگلیسی با خط تیره)</label>
+                    <input type="text" id="id" placeholder="bmw-m3-e92" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 focus:outline-none">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm mb-1">حجم (مثال: 320MB)</label>
+                    <input type="text" id="size" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm mb-1">نسخه (مثال: 1.2)</label>
+                    <input type="text" id="version" value="1.0" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm mb-1">لینک عکس کاور</label>
+                <input type="text" id="image" placeholder="assets/images/filename.jpg یا لینک آنلاین" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2">
+            </div>
+            <div>
+                <label class="block text-sm mb-1">لینک دانلود فایل</label>
+                <input type="url" id="download" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2">
+            </div>
+            <div>
+                <label class="block text-sm mb-1">تگ‌ها (با کاما انگلیسی جدا کنید)</label>
+                <input type="text" id="tags" placeholder="drift, bmw, iranian" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2">
+            </div>
+            <button type="button" onclick="generateJSON()" class="w-full bg-orange-600 hover:bg-orange-700 py-2.5 rounded-lg font-bold transition-all">تولید کد JSON</button>
+        </form>
+
+        <div class="mt-6">
+            <label class="block text-sm mb-1 text-gray-400">خروجی نهایی (این متن را کپی کنید و به انتهای فایل mods.json ببرید):</label>
+            <textarea id="jsonOutput" readonly class="w-full h-32 bg-black border border-gray-800 rounded-lg p-2 font-mono text-xs text-green-400 focus:outline-none"></textarea>
+        </div>
+    </div>
+
+    <script>
+        function generateJSON() {
+            const tagsInput = document.getElementById('tags').value;
+            const tagsArray = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
+            
+            const modObject = {
+                id: document.getElementById('id').value,
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                image: document.getElementById('image').value,
+                size: document.getElementById('size').value,
+                version: document.getElementById('version').value,
+                tags: tagsArray,
+                download: document.getElementById('download').value
+            };
+            
+            // نمایش خروجی به شکل آرایه تکی برای راحتی اضافه کردن
+            document.getElementById('jsonOutput').value = ",\n" + JSON.stringify(modObject, null, 2);
+        }
+    </script>
+</body>
+</html>
