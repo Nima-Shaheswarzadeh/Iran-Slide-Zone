@@ -1,8 +1,12 @@
 let allMods = [];
 let currentCategory = 'all';
 let currentSubFilter = 'all';
+let openCategoryTree = null; // برای ثبت دسته‌بندی باز شده در سایدبار
 
-// ۷ دسته‌بندی کامل درخواستی شما با ایموجی و عکس پس‌زمینه
+// شناسه گوگل شیت خودت را دقیقاً اینجا بگذار
+const SPREADSHEET_ID = "1A2B3C4D5E6F7G8H9I0J"; 
+const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+
 const mainCategories = [
     { id: 'cars', label: 'Cars', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
     { id: 'maps', label: 'Maps', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
@@ -14,44 +18,110 @@ const mainCategories = [
 ];
 
 async function init() {
-    await fetchMods();
+    await fetchModsFromSheets();
     renderCategoriesMenu();
-    renderQuickNav();
     showPage('welcomePage');
 }
 
-async function fetchMods() {
+async function fetchModsFromSheets() {
     try {
-        const response = await fetch('data/mods.json');
-        allMods = await response.json();
+        const response = await fetch(GOOGLE_SHEET_URL);
+        const text = await response.text();
+        const jsonData = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = jsonData.table.rows;
+        
+        allMods = rows.map(row => {
+            const cells = row.c;
+            return {
+                id: cells[0] ? String(cells[0].v) : '',
+                title: cells[1] ? String(cells[1].v) : '',
+                category: cells[2] ? String(cells[2].v).toLowerCase().trim() : '',
+                brand: cells[3] ? String(cells[3].v) : '',
+                subcategory: cells[4] ? String(cells[4].v) : '',
+                image: cells[5] ? String(cells[5].v) : '',
+                backImage: (cells[6] && cells[6].v) ? String(cells[6].v) : (cells[5] ? String(cells[5].v) : ''),
+                size: cells[7] ? String(cells[7].v) : '',
+                version: cells[8] ? String(cells[8].v) : '1.0',
+                download: cells[9] ? String(cells[9].v) : '#',
+                description: cells[10] ? String(cells[10].v) : '',
+                author: {
+                    name: cells[11] ? String(cells[11].v) : 'Admin',
+                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(cells[11] ? cells[11].v : 'Admin')}`
+                },
+                tags: cells[12] ? String(cells[12].v).split(',').map(t => t.trim()) : ['mod']
+            };
+        }).filter(item => item.id && item.title);
     } catch (e) {
-        console.error("خطا در خواندن فایل داده:", e);
+        console.error("خطا در لود زنده داده‌ها از گوگل شیت:", e);
     }
 }
 
-// رندر صفحه منوی اصلی دسته‌بندی‌ها با گوشه‌های خمیده و پس‌زمینه مات
 function renderCategoriesMenu() {
     const grid = document.getElementById('categoriesMenuGrid');
     grid.innerHTML = '';
     mainCategories.forEach(cat => {
         grid.innerHTML += `
-            <div onclick="openCategory('${cat.id}')" class="relative h-36 rounded-2xl overflow-hidden cursor-pointer group border border-gray-800/80 shadow-md">
-                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 group-hover:opacity-15 transition-all duration-500 blur-[2px]">
-                <div class="absolute inset-0 bg-gradient-to-t from-brandBg via-brandBg/40 to-transparent flex flex-col justify-end p-4">
-                    <span class="text-xl mb-1">${cat.icon}</span>
-                    <h3 class="font-bold text-sm text-brandBlue">${cat.label}</h3>
+            <div onclick="openCategory('${cat.id}')" class="relative h-32 rounded-2xl overflow-hidden cursor-pointer group border border-gray-800/70 shadow-md">
+                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 group-hover:opacity-15 transition-all duration-500 blur-[1px]">
+                <div class="absolute inset-0 bg-gradient-to-t from-brandBg via-brandBg/30 to-transparent flex flex-col justify-end p-4">
+                    <span class="text-lg mb-1">${cat.icon}</span>
+                    <h3 class="font-bold text-xs text-brandBlue">${cat.label}</h3>
                 </div>
             </div>
         `;
     });
 }
 
-// رندر دکمه‌های نوار سریع بالایی بدون ریلود
-function renderQuickNav() {
-    const nav = document.getElementById('quickNav');
-    nav.innerHTML = `<button data-target="all" class="q-nav-btn px-4 py-2 bg-brandBlue text-brandDark font-bold rounded-xl text-xs transition-all">همه مودها</button>`;
+// ساخت سیستم منوی درختی سایدبار (مشابه فایل اکسپلورر ویندوز)
+function renderExplorerTree() {
+    const treeContainer = document.getElementById('explorerTree');
+    treeContainer.innerHTML = '';
+
+    // گزینه نمایش همه موارد در بالای فایل اکسپلورر
+    const allActive = (currentCategory === 'all') ? 'bg-brandBlue text-brandDark font-bold' : 'text-gray-400 hover:bg-brandDark/50';
+    treeContainer.innerHTML += `
+        <div onclick="selectTreeCategory('all')" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${allActive}">
+            <i class="fas fa-hdd"></i> <span>Root (همه مودها)</span>
+        </div>
+    `;
+
     mainCategories.forEach(cat => {
-        nav.innerHTML += `<button data-target="${cat.id}" class="q-nav-btn px-4 py-2 bg-brandDark text-gray-400 rounded-xl text-xs hover:bg-gray-800 transition-all">${cat.icon} ${cat.label}</button>`;
+        const isCurrent = (currentCategory === cat.id);
+        const isOpen = (openCategoryTree === cat.id);
+        const catClass = isCurrent ? 'bg-brandDark text-brandBlue font-bold border-r-2 border-brandBlue' : 'text-gray-400 hover:bg-brandDark/40';
+        
+        let subItemsHtml = '';
+        
+        // اگر دسته بندی باز بود، زیر مجموعه‌ها (برند یا کشور) رندر شوند
+        if (isOpen) {
+            let subs = [];
+            if (cat.id === 'cars') subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
+            if (cat.id === 'maps') subs = [...new Set(allMods.filter(m => m.category === 'maps').map(m => m.subcategory))].filter(Boolean);
+
+            subItemsHtml = `<div class="flex flex-col pr-4 mt-1 gap-0.5 border-r border-gray-800/60 mr-2">`;
+            subs.forEach(sub => {
+                const isSubActive = (currentSubFilter === sub);
+                const subClass = isSubActive ? 'text-brandBlue font-bold bg-brandBlue/5' : 'text-gray-500 hover:text-gray-300';
+                subItemsHtml += `
+                    <div onclick="selectTreeSub('${cat.id}', '${sub}', event)" class="px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-all flex items-center gap-1.5 ${subClass}">
+                        <i class="fas fa-angle-left text-[9px]"></i> <span>${sub}</span>
+                    </div>
+                `;
+            });
+            subItemsHtml += `</div>`;
+        }
+
+        treeContainer.innerHTML += `
+            <div class="flex flex-col">
+                <div onclick="toggleTreeCategory('${cat.id}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${catClass}">
+                    <div class="flex items-center gap-2">
+                        <span>${cat.icon}</span> <span>${cat.label}</span>
+                    </div>
+                    <i class="fas ${isOpen ? 'fa-chevron-down' : 'fa-chevron-left'} text-[10px] opacity-60"></i>
+                </div>
+                ${subItemsHtml}
+            </div>
+        `;
     });
 }
 
@@ -67,92 +137,46 @@ function showPage(pageId) {
 
 function openCategory(catId) {
     currentCategory = catId;
+    openCategoryTree = catId; // خودکار زیرمنو باز شود
     currentSubFilter = 'all';
-
-    document.querySelectorAll('.q-nav-btn').forEach(btn => {
-        if(btn.getAttribute('data-target') === catId) {
-            btn.className = "q-nav-btn px-4 py-2 bg-brandBlue text-brandDark font-bold rounded-xl text-xs transition-all";
-        } else {
-            btn.className = "q-nav-btn px-4 py-2 bg-brandDark text-gray-400 rounded-xl text-xs hover:bg-gray-800 transition-all";
-        }
-    });
-
-    const triggerBox = document.getElementById('subFilterTriggerBox');
-    const label = document.getElementById('activeSubFilterLabel');
-    
-    if (catId === 'cars') {
-        triggerBox.classList.remove('hidden');
-        label.innerText = "انتخاب برند خودرو (نمای اتوگالری کانتنت منیجر)";
-    } else if (catId === 'maps') {
-        triggerBox.classList.remove('hidden');
-        label.innerText = "انتخاب کشور / موقعیت نقشه";
-    } else {
-        triggerBox.classList.add('hidden');
-    }
-
     showPage('galleryPage');
+    renderExplorerTree();
     filterAndRender();
 }
 
-// باز کردن پاپ‌آپ استایل کانتنت منیجر دقیقاً مشابه تصویر ارسالی
-function openSubFilterSelector() {
-    const cmGrid = document.getElementById('cmGrid');
-    const title = document.getElementById('cmModalTitle');
-    cmGrid.innerHTML = '';
-
-    if (currentCategory === 'cars') {
-        title.innerText = "انتخاب برند خودرو";
-        // دکمه ریست همه برندها
-        const allCount = allMods.filter(m => m.category === 'cars').length;
-        cmGrid.innerHTML += makeCmItem('all', 'همه برندها', 'https://api.dicebear.com/7.x/identicon/svg?seed=all', allCount);
-        
-        const brands = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))];
-        brands.forEach(b => {
-            if(!b) return;
-            const count = allMods.filter(m => m.category === 'cars' && m.brand === b).length;
-            // تولید لوگوی فرضی شیک، در صورت وجود عکس واقعی جایگزین می‌شود
-            const fakeLogo = `https://api.dicebear.com/7.x/initials/svg?seed=${b}&backgroundColor=101a40`;
-            cmGrid.innerHTML += makeCmItem(b, b, fakeLogo, count);
-        });
-    } else if (currentCategory === 'maps') {
-        title.innerText = "انتخاب کشور / موقعیت";
-        const allCount = allMods.filter(m => m.category === 'maps').length;
-        cmGrid.innerHTML += makeCmItem('all', 'همه کشورها', 'https://api.dicebear.com/7.x/identicon/svg?seed=map', allCount);
-
-        const countries = [...new Set(allMods.filter(m => m.category === 'maps').map(m => m.subcategory))];
-        countries.forEach(c => {
-            if(!c) return;
-            const count = allMods.filter(m => m.category === 'maps' && m.subcategory === c).length;
-            const flagImg = `https://api.dicebear.com/7.x/initials/svg?seed=${c}&chars=1`;
-            cmGrid.innerHTML += makeCmItem(c, c, flagImg, count);
-        });
+// مدیریت کلیک روی دسته‌بندی اصلی در سایدبار
+function toggleTreeCategory(catId) {
+    if (openCategoryTree === catId) {
+        // کلیک مجدد: بستن زیرمجموعه و نشان دادن کل موارد دسته‌بندی بدون فیلتر فرعی
+        openCategoryTree = null;
+        currentCategory = catId;
+        currentSubFilter = 'all';
+    } else {
+        openCategoryTree = catId;
+        currentCategory = catId;
+        currentSubFilter = 'all';
     }
-
-    document.getElementById('cmModal').classList.remove('hidden');
-}
-
-function makeCmItem(id, name, logo, count) {
-    return `
-        <div onclick="selectSubFilter('${id}')" class="bg-[#161f33] border border-gray-800 hover:border-gray-600 rounded p-3 flex flex-col items-center justify-center text-center relative cursor-pointer group transition-all h-24">
-            <span class="absolute top-1 right-1 text-[9px] text-gray-500 font-mono">${count}</span>
-            <img src="${logo}" class="w-8 h-8 object-contain mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-            <span class="text-[11px] font-bold text-gray-300 truncate w-full">${name}</span>
-        </div>
-    `;
-}
-
-function selectSubFilter(subId) {
-    currentSubFilter = subId;
-    document.getElementById('activeSubFilterLabel').innerText = subId === 'all' ? 'همه موارد' : subId;
-    closeSubFilterSelector();
+    renderExplorerTree();
     filterAndRender();
 }
 
-function closeSubFilterSelector() {
-    document.getElementById('cmModal').classList.add('hidden');
+function selectTreeCategory(catId) {
+    currentCategory = catId;
+    openCategoryTree = (catId === 'all') ? null : catId;
+    currentSubFilter = 'all';
+    renderExplorerTree();
+    filterAndRender();
 }
 
-// رندر فلش کارت‌ها با قابلیت چرخش بلور اکریلیک و پشت کارت ساده به خواست شما
+function selectTreeSub(catId, subName, event) {
+    event.stopPropagation(); // جلوگیری از بسته شدن منوی مادری
+    currentCategory = catId;
+    currentSubFilter = subName;
+    renderExplorerTree();
+    filterAndRender();
+}
+
+// رندر فلش کارت‌ها با لبه‌های کاملاً گرد، نسبت عکس ۴:۳ افقی، و دکمه‌های پایینی ثابت در لایه بیرونی
 function renderCards(mods) {
     const grid = document.getElementById('modsGrid');
     grid.innerHTML = '';
@@ -164,61 +188,45 @@ function renderCards(mods) {
 
     mods.forEach((mod, index) => {
         const cardBox = document.createElement('div');
-        cardBox.className = "card-perspective h-[420px] w-full relative";
+        cardBox.className = "flex flex-col gap-3"; // سبد نگه‌دارنده کارت و دکمه‌ها برای چسبیدن به هم
         
         cardBox.innerHTML = `
-            <div class="absolute -top-10 left-0 right-0 z-20 flex justify-center">
-                <div class="acrylic border border-gray-700/50 text-gray-200 text-xs font-bold px-4 py-1.5 rounded-xl shadow-lg truncate max-w-[85%] text-center">
-                    ${mod.title}
+            <div class="card-perspective h-56 w-full relative">
+                <div class="absolute -top-10 left-0 right-0 z-20 flex justify-center">
+                    <div class="acrylic border border-gray-800/80 text-gray-200 text-[11px] font-bold px-4 py-1.5 rounded-xl shadow-lg truncate max-w-[85%] text-center">
+                        ${mod.title}
+                    </div>
+                    <div class="flow-line h-4 -bottom-4"></div>
                 </div>
-                <div class="flow-line h-4 -bottom-4"></div>
+
+                <div class="card-inner w-full h-full cursor-pointer" id="card-${index}" onclick="handleCardClick(event, ${index})">
+                    
+                    <div class="card-front bg-brandDark/40 border border-gray-800/60 relative">
+                        <img src="${mod.image}" class="w-full h-full object-cover" loading="lazy">
+                        <div class="absolute bottom-2 right-2 left-2 flex justify-between items-center bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] text-gray-400">
+                            <span><i class="fas fa-hdd ml-1 text-brandBlue"></i>${mod.size}</span>
+                            <span class="uppercase text-brandBlue font-bold">${mod.brand || mod.category}</span>
+                        </div>
+                    </div>
+
+                    <div class="card-back bg-brandDark/50 border border-brandBlue/20 relative">
+                        <img src="${mod.backImage}" class="w-full h-full object-cover" loading="lazy">
+                        <div class="absolute bottom-2 right-2 left-2 flex justify-between items-center bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] text-gray-400">
+                            <span><i class="fas fa-code-branch ml-1 text-brandBlue"></i>v${mod.version}</span>
+                            <span class="text-emerald-400">نمای عقب <i class="fas fa-sync mr-1"></i></span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="card-inner w-full h-full cursor-pointer" id="card-${index}" onclick="handleCardClick(event, ${index})">
-                
-                <div class="card-front bg-brandDark/40 border border-gray-800/80 flex flex-col justify-between shadow-xl">
-                    <div class="flex-1 flex flex-col relative">
-                        <div class="w-full h-[55%] bg-gray-950 overflow-hidden relative">
-                            <img src="${mod.image}" class="w-full h-full object-cover" loading="lazy">
-                            <span class="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-[9px] px-2 py-0.5 rounded text-brandBlue uppercase">${mod.category}</span>
-                        </div>
-                        <div class="w-full h-[45%] bg-gray-900 border-t border-brandBg overflow-hidden">
-                            <img src="${mod.backImage || mod.image}" class="w-full h-full object-cover" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="px-4 py-3 bg-brandBg/60 flex justify-between items-center text-[10px] text-gray-400 border-t border-gray-800/40">
-                        <span><i class="fas fa-hdd ml-1 text-brandBlue"></i>${mod.size}</span>
-                        <span><i class="fas fa-code-branch ml-1 text-brandBlue"></i>v${mod.version}</span>
-                    </div>
-                </div>
-
-                <div class="card-back acrylic-flip border border-brandBlue/30 p-4 flex flex-col justify-between shadow-2xl">
-                    <div class="text-left">
-                        <span class="text-[9px] bg-brandBg text-brandBlue font-bold px-2 py-0.5 rounded uppercase">
-                            ${mod.category === 'cars' ? `🚗 ${mod.brand}` : `✨ ${mod.category}`}
-                        </span>
-                    </div>
-
-                    <div class="flex-1 flex flex-col justify-center gap-3">
-                        <p class="text-[11px] text-gray-300 text-justify line-clamp-6 leading-relaxed">
-                            ${mod.description || 'توضیحات تکمیلی برای این مود ثبت نشده است.'}
-                        </p>
-                        
-                        <button onclick="openModal(event, '${mod.title}', \`${mod.description}\`)" class="w-full bg-brandBg/80 hover:bg-gray-800 border border-gray-700/50 text-[10px] py-1.5 rounded-lg text-gray-400">
-                            مشاهده متن کامل توضیحات
-                        </button>
-                        
-                        <a href="${mod.download}" target="_blank" onclick="event.stopPropagation();" class="w-full block text-center bg-brandBlue hover:bg-blue-600 text-brandDark text-xs font-black py-2.5 rounded-xl shadow-md transition-all">
-                            <i class="fas fa-download ml-1.5"></i>دانلود مستقیم مود
-                        </a>
-                    </div>
-
-                    <div class="flex items-center gap-2 border-t border-gray-800/80 pt-2.5 text-[10px] text-gray-500">
-                        <img src="${mod.author?.avatar}" class="w-4 h-4 rounded-full bg-brandBg" alt="avatar">
-                        <span>ارسال توسط: <strong class="text-gray-400">${mod.author?.name || 'ادمین'}</strong></span>
-                    </div>
-                </div>
-
+            <div class="w-full flex gap-2">
+                <button onclick="openInfoModal(event, ${index})" class="w-11 h-11 bg-brandDark/60 hover:bg-brandDark border border-gray-800 rounded-xl flex items-center justify-center text-brandBlue text-sm transition-all shadow-md">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <a href="${mod.download}" target="_blank" onclick="event.stopPropagation();" class="flex-1 h-11 bg-brandBlue hover:bg-blue-600 text-brandDark font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-brandBlue/5 transition-all">
+                    <i class="fas fa-cloud-download-alt"></i> دانلود مستقیم مود
+                </a>
             </div>
         `;
         grid.appendChild(cardBox);
@@ -226,7 +234,6 @@ function renderCards(mods) {
 }
 
 function handleCardClick(event, index) {
-    if (event.target.closest('button') || event.target.closest('a')) return;
     const card = document.getElementById(`card-${index}`);
     card.classList.toggle('card-flipped');
 }
@@ -242,22 +249,30 @@ function filterAndRender() {
     renderCards(filtered);
 }
 
-document.getElementById('quickNav').addEventListener('click', (e) => {
-    if(!e.target.classList.contains('q-nav-btn')) return;
-    openCategory(e.target.getAttribute('data-target'));
-});
+// مدیریت کلیک دکمه اطلاعات و لود محتوایی درون پاپ‌آپ
+function openInfoModal(event, index) {
+    event.stopPropagation(); // جلوگیری از چرخش کارت پشت دکمه
+    const mod = allMods[index];
+    
+    document.getElementById('infoModalTitle').innerText = mod.title;
+    document.getElementById('infoModalDesc').innerText = mod.description || "توضیحاتی برای این مود ثبت نشده است.";
+    document.getElementById('infoModalAuthor').innerText = mod.author.name;
+    document.getElementById('infoModalAvatar').src = mod.author.avatar;
+    document.getElementById('infoModalCategory').innerText = mod.category;
+    
+    const tagsBox = document.getElementById('infoModalTags');
+    tagsBox.innerHTML = '';
+    mod.tags.forEach(t => {
+        if(t) tagsBox.innerHTML += `<span class="bg-brandDark border border-gray-800 text-gray-400 text-[10px] px-2 py-0.5 rounded-md">#${t}</span>`;
+    });
 
-function openModal(e, title, text) {
-    e.stopPropagation();
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalBody').innerText = text;
-    document.getElementById('descModal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('modalContainer').classList.remove('scale-95'), 10);
+    document.getElementById('infoModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('infoModalContainer').classList.remove('scale-95'), 10);
 }
 
-function closeModal() {
-    document.getElementById('modalContainer').classList.add('scale-95');
-    setTimeout(() => document.getElementById('descModal').classList.add('hidden'), 200);
+function closeInfoModal() {
+    document.getElementById('infoModalContainer').classList.add('scale-95');
+    setTimeout(() => document.getElementById('infoModal').classList.add('hidden'), 200);
 }
 
 document.getElementById('searchBar').addEventListener('input', filterAndRender);
