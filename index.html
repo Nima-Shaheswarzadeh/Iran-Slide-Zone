@@ -6,166 +6,206 @@
     <title>ایران اسلاید زون | Iran Slide Zone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://v1.fontapi.ir/css/Vazir" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        cmBg: '#0b0c10',      /* تیره عمیق لوکس */
-                        cmCard: '#12131c',    /* زغال‌سنگی متالیک */
-                        cmAccent: '#4752c4',  /* آبی/بنفش برند زون */
-                        cmText: '#dbdee1'
+                        'primary': '#0b0c10',
+                        'primary-light': '#12131c',
+                        'card-bg': '#161820',
+                        'accent': '#3b82f6',
+                        'accent-dark': '#2563eb',
+                        'text-primary': '#e2e8f0',
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://v1.fontapi.ir/css/Vazir');
-        body { 
-            font-family: 'Vazir', sans-serif; 
-            background-color: #0b0c10; 
-            color: #dbdee1;
-            overflow-x: hidden; 
+        body {
+            font-family: 'Vazir', sans-serif;
+            background: linear-gradient(135deg, #0b0c10 0%, #12131c 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
-        
-        /* پپ‌زمینه سینمایی و زنده */
-        .bg-glow {
-            position: fixed; top: -50%; left: -50%; right: -50%; bottom: -50%;
-            background: radial-gradient(circle at 20% 30%, rgba(71, 82, 196, 0.05) 0%, transparent 40%),
-                        radial-gradient(circle at 80% 70%, rgba(20, 22, 35, 0.5) 0%, transparent 60%);
-            animation: spinGlow 40s linear infinite; z-index: -1; pointer-events: none;
+        /* background ambient animation */
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(59,130,246,0.02) 0%, transparent 60%);
+            animation: drift 30s ease-in-out infinite alternate;
+            z-index: -1;
+            pointer-events: none;
         }
-        @keyframes spinGlow { 100% { transform: rotate(360deg); } }
+        @keyframes drift {
+            0% { transform: translate(0,0) rotate(0deg); }
+            100% { transform: translate(20px, -10px) rotate(2deg); }
+        }
+        /* custom scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #2d3045; border-radius: 10px; }
 
-        /* فیکس قطعی و ساختار سه‌بعدی بدون لرزش فلش‌کارت */
-        .card-perspective { perspective: 2000px; }
+        /* 3D card engine */
+        .card-perspective { perspective: 1800px; }
         .card-inner {
-            position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d; 
-            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
             border-radius: 1.25rem;
+            will-change: transform;
         }
         .card-flipped { transform: rotateY(180deg); }
-        
-        .card-front, .card-back { 
-            position: absolute; inset: 0; width: 100%; height: 100%; 
-            backface-visibility: hidden; 
+        .card-front, .card-back {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
-            border-radius: 1.25rem; overflow: hidden; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px border-[#1e2030];
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(59,130,246,0.12);
         }
         .card-back { transform: rotateY(180deg); }
-        
-        /* انیمیشن باز شدن حباب‌های معلق بالایی */
-        .pill-anim { animation: fanOut 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes fanOut {
-            0% { transform: translateY(10px) scale(0.9); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
+
+        /* glass pills */
+        .mod-pill {
+            backdrop-filter: blur(18px);
+            background: rgba(22,24,32,0.55);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            padding: 0.45rem 1.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* fan-in entrance */
+        .pill-animate {
+            opacity: 0;
+            animation: fanIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+        @keyframes fanIn {
+            0% { opacity: 0; transform: translateY(12px) scale(0.92); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* دکمه دانلود با افکت تپش لمسی */
-        .btn-download-glow {
-            background: linear-gradient(135deg, #4752c4 0%, #313ca6 100%);
-            box-shadow: 0 4px 15px rgba(71, 82, 196, 0.3);
-            transition: all 0.2s ease;
+        /* download wave */
+        .download-wave {
+            animation: wave 0.65s ease-out;
         }
-        .btn-download-glow:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(71, 82, 196, 0.5); }
-
-        /* ساختار انیمیشن کشویی نرم سایدبار */
-        .submenu-transition {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        @keyframes wave {
+            0% { transform: scale(0.7); opacity: 0.9; }
+            60% { transform: scale(1.2); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
         }
-        .submenu-open { max-height: 500px; }
+        .btn-clicked {
+            transform: scale(0.95) !important;
+            transition: transform 0.1s ease;
+        }
 
-        .flow-line { position: absolute; width: 2px; background: linear-gradient(to bottom, #4752c4, transparent); left: 50%; transform: translateX(-50%); }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #1e2030; border-radius: 10px; }
+        /* sidebar accordion */
+        .sub-tree {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="flex flex-col min-h-screen">
 
-    <div class="bg-glow"></div>
+    <!-- ambient background -->
+    <div class="bg-pattern"></div>
 
-    <header id="mainHeader" class="border-b border-[#1e2030] bg-[#0b0c10]/90 backdrop-blur-md sticky top-0 z-40 px-4 py-3.5 hidden">
+    <!-- Header (visible only in gallery) -->
+    <header id="mainHeader" class="border-b border-white/5 bg-primary/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 hidden">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
                 <span class="text-base">🏁</span>
                 <h1 class="text-sm font-black tracking-wider text-white">IRAN SLIDE ZONE</h1>
             </div>
             <div class="relative w-full sm:w-80">
-                <input type="text" id="searchBar" placeholder="جستجو در مودها..." class="w-full bg-[#12131c] border border-[#1e2030] rounded-xl px-4 py-1.5 pr-10 text-xs text-white focus:outline-none focus:border-cmAccent transition-all">
-                <i class="fas fa-search absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                <input type="text" id="searchBar" placeholder="جستجو در مودها..." class="w-full bg-card-bg border border-white/5 rounded-xl px-4 py-1.5 pr-10 text-xs text-white focus:outline-none focus:border-accent transition-all">
+                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
             </div>
         </div>
     </header>
 
-    <section id="welcomePage" class="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 hidden">
-        <div class="max-w-xl bg-[#12131c] border border-[#1e2030] p-10 rounded-2xl shadow-2xl relative overflow-hidden">
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-cmAccent/10 rounded-full blur-2xl"></div>
-            <span class="text-4xl inline-block mb-3 animate-pulse">🏎️</span>
-            <h2 class="text-xl font-black text-white mb-2">ایران اسلاید زون</h2>
-            <p class="text-gray-400 text-xs leading-relaxed mb-8">مرجع شبیه‌سازی و دانلود مستقیم مودهای بهینه بازی آستو کورسا متصل به دیتابیس ابری زنده.</p>
-            <button onclick="navigateTo('categories')" class="bg-cmAccent hover:bg-[#3842b0] text-white font-bold px-10 py-4 rounded-xl shadow-lg transition-all text-xs tracking-wide">
+    <!-- Welcome Page -->
+    <section id="welcomePage" class="flex-1 flex flex-col items-center justify-center text-center px-4 py-12">
+        <div class="max-w-xl bg-primary-light/80 backdrop-blur-md border border-white/5 p-10 rounded-3xl shadow-2xl">
+            <span class="text-5xl inline-block mb-4 drop-shadow-glow">🏎️</span>
+            <h2 class="text-2xl font-black text-white mb-3">ایران اسلاید زون</h2>
+            <p class="text-gray-300 text-sm leading-relaxed mb-8">مرجع تخصصی و بهینه مودهای بازی Assetto Corsa زنده متصل به پایگاه داده ابری.</p>
+            <button onclick="navigateTo('categories')" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold px-10 py-3.5 rounded-2xl shadow-lg shadow-blue-500/20 transition-all duration-200 text-sm active:scale-95">
                 ورود به بخش دانلود مود <i class="fas fa-arrow-left mr-2"></i>
             </button>
         </div>
     </section>
 
-    <section id="categoriesPage" class="max-w-5xl w-full mx-auto px-4 py-12 hidden">
-        <h2 class="text-base font-bold text-center mb-1 text-white">انتخاب دسته‌بندی مود</h2>
-        <p class="text-center text-[11px] text-gray-500 mb-8">وارد بخش مورد نظر خود شوید</p>
+    <!-- Categories Page -->
+    <section id="categoriesPage" class="max-w-5xl w-full mx-auto px-4 py-16 hidden">
+        <h2 class="text-xl font-bold text-center mb-2 text-white">انتخاب دسته‌بندی مود</h2>
+        <p class="text-center text-xs text-gray-400 mb-10">وارد بخش مورد نظر خود شوید</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="categoriesMenuGrid"></div>
-        <div class="text-center mt-8">
-            <button onclick="navigateTo('home')" class="text-xs text-gray-500 hover:text-white transition-all"><i class="fas fa-arrow-right ml-1"></i> بازگشت به خانه</button>
+        <div class="text-center mt-10">
+            <button onclick="navigateTo('home')" class="text-xs text-gray-400 hover:text-white transition-all"><i class="fas fa-arrow-right ml-1"></i> بازگشت به خانه</button>
         </div>
     </section>
 
+    <!-- Gallery Page (sidebar + cards) -->
     <section id="galleryPage" class="max-w-[1500px] w-full mx-auto px-4 py-6 hidden flex-1 flex flex-col md:flex-row gap-6">
         
-        <aside class="w-full md:w-64 bg-[#12131c] border border-[#1e2030] rounded-2xl p-4 h-auto md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col gap-2">
-            <h3 class="text-[10px] font-black text-gray-400 mb-1 pb-2 border-b border-[#1e2030] flex items-center gap-2 uppercase tracking-widest">
-                <i class="fas fa-gamepad text-cmAccent text-xs"></i> IRAN SLIDE ZONE MOD MANAGER
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-primary-light/90 backdrop-blur-sm border border-white/5 rounded-2xl p-4 h-auto md:h-[calc(100vh-140px)] sticky top-20 overflow-y-auto custom-scroll flex flex-col gap-3">
+            <h3 class="text-xs font-bold text-white/80 pb-3 border-b border-white/5 flex items-center gap-2 uppercase tracking-widest">
+                <i class="fas fa-cubes text-accent"></i> IRAN SLIDE ZONE MOD MANAGER
             </h3>
-            <div id="explorerTree" class="flex flex-col gap-1">
-                </div>
+            <div id="explorerTree" class="flex flex-col gap-0.5"></div>
         </aside>
 
+        <!-- Cards Grid -->
         <main class="flex-1">
-            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-16 gap-x-6 pt-6">
-                </div>
+            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-16 gap-x-6 pt-6"></div>
         </main>
     </section>
 
-    <div id="infoModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="closeInfoModal()">
-        <div class="bg-[#12131c] border border-[#1e2030] rounded-2xl max-w-md w-full overflow-hidden shadow-2xl scale-95 transition-all duration-200" id="infoModalContainer" onclick="event.stopPropagation()">
-            <div class="p-4 border-b border-[#1e2030] flex justify-between items-center bg-[#0b0c10]">
-                <h3 id="infoModalTitle" class="font-bold text-xs text-white">مشخصات تکمیلی مود</h3>
+    <!-- Info Modal -->
+    <div id="infoModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="closeInfoModal()">
+        <div class="bg-primary-light/95 border border-white/10 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl scale-95 transition-all duration-200" id="infoModalContainer" onclick="event.stopPropagation()">
+            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-primary">
+                <h3 id="infoModalTitle" class="font-bold text-xs text-white">مشخصات مود</h3>
                 <button onclick="closeInfoModal()" class="text-gray-400 hover:text-white text-base"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-4 text-xs">
                 <div>
                     <h4 class="text-gray-400 font-bold mb-1">توضیحات ادمین:</h4>
-                    <p id="infoModalDesc" class="text-gray-300 leading-relaxed text-justify bg-[#0b0c10] p-3 rounded-xl border border-[#1e2030]/60"></p>
+                    <p id="infoModalDesc" class="text-gray-300 leading-relaxed text-justify bg-primary/60 p-3 rounded-xl border border-white/5"></p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-gray-400 font-bold">تگ‌ها:</span>
                     <div id="infoModalTags" class="flex flex-wrap gap-1"></div>
                 </div>
-                <div class="flex items-center justify-between border-t border-[#1e2030] pt-3 text-[11px]">
+                <div class="flex items-center justify-between border-t border-white/5 pt-3 text-[11px]">
                     <div class="flex items-center gap-2">
-                        <img id="infoModalAvatar" class="w-5 h-5 rounded-full bg-[#0b0c10]" src="">
-                        <span>ارسال توسط: <strong id="infoModalAuthor" class="text-white"></strong></span>
+                        <img id="infoModalAvatar" class="w-5 h-5 rounded-full bg-primary" src="">
+                        <span>ارسال: <strong id="infoModalAuthor" class="text-white"></strong></span>
                     </div>
-                    <span id="infoModalCategory" class="text-cmAccent font-bold bg-cmAccent/10 px-2 py-0.5 rounded-lg uppercase"></span>
+                    <span id="infoModalCategory" class="text-accent font-bold bg-accent/10 px-2 py-0.5 rounded-lg uppercase"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="border-t border-[#12131c] bg-[#0b0c10] py-3.5 text-center text-[11px] text-gray-500 font-medium">
+    <!-- Footer -->
+    <footer class="border-t border-white/5 bg-primary/90 py-3 text-center text-[10px] text-gray-500">
         تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.
     </footer>
 
