@@ -37,7 +37,7 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* انیمیشن لودینگ جریان خطی نئونی گوگل */
+        /* انیمیشن جریان خطی نئونی لودینگ گوگل */
         @keyframes neonFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -48,10 +48,10 @@
             position: relative;
             background: linear-gradient(90deg, #ff0055, #00ffcc, #7000ff, #ff0055);
             background-size: 300% 300%;
-            animation: neonFlow 6s ease infinite;
+            animation: neonFlow 5s linear infinite;
         }
 
-        /* اتصال تزیینی عنوان به اسلایدر */
+        /* طناب/نخ فانتزی متصل کننده باکس عنوان */
         .hanging-string {
             position: absolute;
             bottom: -16px;
@@ -67,19 +67,19 @@
             position: relative;
             width: 100%;
             height: 215px;
-            padding: 3px;
+            padding: 2px;
             border-radius: 1.5rem;
         }
         
         .neon-card-flow {
             background: linear-gradient(135deg, #ff0055, #00ffcc, #7000ff, #ff0055);
             background-size: 400% 400%;
-            animation: neonFlow 8s linear infinite;
+            animation: neonFlow 7s linear infinite;
         }
 
         .img-layer {
-            position: absolute; inset: 3px; 
-            border-radius: 1.3rem; overflow: hidden;
+            position: absolute; inset: 2px; 
+            border-radius: 1.4rem; overflow: hidden;
             box-shadow: 0 12px 30px rgba(0,0,0,0.5);
             background: #11121c;
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.4s ease;
@@ -98,21 +98,17 @@
 
         .btn-download-unique {
             background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
             transition: all 0.25s ease;
         }
         .btn-download-unique:hover {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-        }
-
-        .sidebar-folder {
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
         }
 
         .submenu-transition {
             max-height: 0; overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .submenu-open { max-height: 500px; }
 
@@ -139,14 +135,15 @@
             <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
                 <div class="p-[1px] rounded-xl neon-line-border">
                     <div class="flex items-center gap-1.5 dark:bg-[#06070d] bg-white p-1 rounded-xl shadow-inner">
-                        <button onclick="toggleThemeMode()" id="themeBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs text-amber-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all" title="Toggle Theme">
+                        <button onclick="toggleThemeMode()" id="themeBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs text-amber-400 hover:bg-white/5 transition-all">
                             <i class="fas fa-moon"></i>
                         </button>
-                        <button onclick="toggleLanguage()" id="langBtn" class="px-2.5 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-indigo-500 hover:bg-black/5 dark:hover:bg-white/5 transition-all" title="Change Language">
+                        <button onclick="toggleLanguage()" id="langBtn" class="px-2.5 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-indigo-500 hover:bg-white/5 transition-all">
                             EN
                         </button>
                     </div>
                 </div>
+                
                 <div class="relative w-full sm:w-72 p-[1px] rounded-xl neon-line-border">
                     <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full dark:bg-[#06070d] bg-white rounded-xl px-4 py-2 pr-10 text-xs dark:text-white text-gray-900 focus:outline-none transition-all">
                     <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
@@ -171,8 +168,8 @@
     <section id="categoriesPage" class="max-w-6xl w-full mx-auto px-4 py-16 hidden">
         <h2 id="catPageTitle" class="text-lg font-black text-center mb-1">DATABASE LIBRARIES</h2>
         <p id="catPageSub" class="text-center text-[10px] text-gray-400 mb-10 uppercase tracking-widest">کتابخانه مود مورد نظر خود را انتخاب کنید</p>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4" id="categoriesMenuGrid"></div>
-        <div class="text-center mt-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="categoriesMenuGrid"></div>
+        <div class="text-center mt-12">
             <button onclick="navigateTo('home')" id="exitHubBtn" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all"><i class="fas fa-arrow-right ml-1"></i> خروج از هاب</button>
         </div>
     </section>
@@ -182,20 +179,20 @@
             <aside class="w-full h-full dark:bg-zoneBg bg-white rounded-3xl p-5 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl shadow-sm">
                 <div class="flex flex-col gap-2">
                     <h3 class="text-[10px] font-black text-gray-400 mb-2 pb-2.5 border-b dark:border-white/5 border-black/5 flex items-center gap-2 uppercase tracking-widest">
-                        <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> ISZ MOD MANAGER
+                        <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> Mod Navigation
                     </h3>
                     <div id="explorerTree" class="flex flex-col gap-1.5"></div>
                 </div>
                 <div class="pt-3 border-t dark:border-white/5 border-black/5">
                     <button onclick="openLeaderboard()" id="sideLeaderboardBtn" class="w-full py-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fas fa-trophy text-xs animate-bounce"></i> <span>جدول ادمین‌های فعال</span>
+                        <i class="fas fa-trophy text-xs animate-bounce"></i> <span>لیدربرد ادمین ها</span>
                     </button>
                 </div>
             </aside>
         </div>
 
         <main class="flex-1">
-            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-20 gap-x-6 pt-12"></div>
+            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-24 gap-x-6 pt-12"></div>
         </main>
     </section>
 
@@ -210,14 +207,15 @@
                     <h4 id="modalDescTitle" class="text-gray-400 font-bold mb-1.5">توضیحات و بررسی فنی:</h4>
                     <p id="infoModalDesc" class="dark:text-gray-300 text-gray-700 leading-relaxed text-justify dark:bg-[#06070d] bg-gray-50 p-4 rounded-xl border dark:border-white/5 border-black/5"></p>
                 </div>
-                <div class="flex items-center gap-2 flex-wrap">
+                <div>
+                    <h4 id="modalDevTitle" class="text-gray-400 font-bold mb-1">سازنده مود:</h4>
+                    <p id="infoModalCreator" class="dark:text-white text-gray-900 font-bold text-sm bg-indigo-500/5 p-2 rounded-lg border border-indigo-500/10 inline-block"></p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap pt-2">
                     <span id="modalTagsTitle" class="text-gray-400 font-bold">تگ‌های متادیتا:</span>
                     <div id="infoModalTags" class="flex flex-wrap gap-1"></div>
                 </div>
-                <div class="flex items-center justify-between border-t dark:border-white/5 border-black/5 pt-4 text-[11px]">
-                    <div class="flex items-center gap-2">
-                        <span class="text-gray-500"><span id="modalDevTitle">سازنده مود</span>: <strong id="infoModalDeveloper" class="dark:text-white text-gray-900"></strong></span>
-                    </div>
+                <div class="flex items-center justify-end border-t dark:border-white/5 border-black/5 pt-4 text-[11px]">
                     <span id="infoModalCategory" class="text-zoneGlow font-black bg-zoneAccent/10 px-2.5 py-1 rounded-md uppercase border border-zoneAccent/20"></span>
                 </div>
             </div>
