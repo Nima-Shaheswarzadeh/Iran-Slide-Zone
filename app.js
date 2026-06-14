@@ -4,7 +4,9 @@ let currentSubFilter = 'all';
 let openCategoryTree = null;   
 let isMuted = false;
 
-// موتور صوتی پیشرفته و فوق لایت گیمینگ
+// برای هر کارت وضعیت عکسِ در حال نمایش (0 یا 1 یا 2) را نگه می‌دارد
+let cardImageIndexes = {}; 
+
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
@@ -24,11 +26,11 @@ function playSound(type) {
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         } else if (type === 'flip') {
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(450, audioCtx.currentTime + 0.15);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.12);
+            gainNode.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.12);
         }
     } catch (e) { console.log(e); }
 }
@@ -91,16 +93,18 @@ async function fetchModsFromSheets() {
         const jsonData = JSON.parse(text.substr(47).slice(0, -2));
         const rows = jsonData.table.rows;
         
-        allMods = rows.map(row => {
+        allMods = rows.map((row, idx) => {
             const cells = row.c;
             return {
-                id: cells[0] ? String(cells[0].v) : '',
+                id: cells[0] ? String(cells[0].v) : String(idx),
                 title: cells[1] ? String(cells[1].v) : '',
                 category: cells[2] ? String(cells[2].v).toLowerCase().trim() : '',
                 brand: cells[3] ? String(cells[3].v) : '',
                 subcategory: cells[4] ? String(cells[4].v) : '',
                 image: cells[5] ? String(cells[5].v) : '',
-                backImage: (cells[6] && cells[6].v) ? String(cells[6].v) : (cells[5] ? String(cells[5].v) : ''),
+                backImage: cells[6] ? String(cells[6].v) : '',
+                // ستون سیزدهم (M) در لایه جدید دیتابیس برای عکس سوم تعبیه شده است
+                extraImage: cells[12] ? String(cells[12].v) : '', 
                 size: cells[7] ? String(cells[7].v) : '',
                 version: cells[8] ? String(cells[8].v) : '1.0',
                 download: cells[9] ? String(cells[9].v) : '#',
@@ -109,7 +113,7 @@ async function fetchModsFromSheets() {
                     name: cells[11] ? String(cells[11].v) : 'Admin',
                     avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(cells[11] ? cells[11].v : 'Admin')}`
                 },
-                tags: cells[12] ? String(cells[12].v).split(',').map(t => t.trim()) : ['mod']
+                tags: cells[13] ? String(cells[13].v).split(',').map(t => t.trim()) : ['mod']
             };
         }).filter(item => item.id && item.title).reverse(); 
     } catch (e) { console.error(e); }
@@ -208,7 +212,7 @@ function showPage(pageId) {
     if (pageId === 'galleryPage') document.getElementById('mainHeader').classList.remove('hidden');
 }
 
-// رندر کارت‌ها با افکت Staggered لوکس و بازمهندسی دکمه گالری و دانلودر
+// رندر کارت‌ها با ساختار متقارن، اطلاعات تفکیک شده پایینی و استک سه تایی متحرک
 function renderCards(mods) {
     const grid = document.getElementById('modsGrid');
     grid.innerHTML = '';
@@ -219,44 +223,49 @@ function renderCards(mods) {
     }
 
     mods.forEach((mod, index) => {
+        // ریست یا مقداردهی اولیه ایندکس تصویر کارت روی عکس اول (0)
+        cardImageIndexes[index] = 0;
+
+        // اگر آدرس تصاویر فرعی خالی بود، برای جلوگیری از خرابی استک از تصویر اصلی استفاده کند
+        const img1 = mod.image || 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400';
+        const img2 = mod.backImage || img1;
+        const img3 = mod.extraImage || img1;
+
         const cardBox = document.createElement('div');
-        cardBox.className = "stagger-card flex flex-col gap-4"; 
-        cardBox.style.animationDelay = `${index * 0.06}s`; // ایجاد افکت پله‌ای
+        cardBox.className = "stagger-card flex flex-col gap-3"; 
+        cardBox.style.animationDelay = `${index * 0.05}s`;
         
         cardBox.innerHTML = `
-            <div class="card-perspective h-52 w-full relative">
-                <div class="absolute -top-10 left-0 right-0 z-20 flex justify-center px-4 pointer-events-none">
-                    <div class="bg-zoneGlass border border-white/10 text-white text-[11px] font-black px-5 py-2 rounded-2xl shadow-xl backdrop-blur-md truncate max-w-[90%] border-t-white/10">
-                        ${mod.title}
-                    </div>
-                    <div class="flow-line h-4 -bottom-4"></div>
+            <div class="card-perspective" id="stack-container-${index}">
+                
+                <div class="img-layer" id="layer-A-${index}" style="z-index: 3; transform: translate(0px, 0px) scale(1); opacity: 1;">
+                    <img src="${img1}" class="w-full h-full object-cover select-none">
                 </div>
 
-                <div class="card-inner w-full h-full" id="card-${index}">
-                    
-                    <div class="card-front">
-                        <img src="${mod.image}" class="w-full h-full object-cover select-none">
-                        <div class="absolute bottom-2.5 right-2.5 left-2.5 flex justify-between items-center bg-[#06070d]/90 backdrop-blur-md px-3.5 py-2 rounded-xl text-[10px] text-gray-300 border border-white/5">
-                            <div class="flex items-center gap-3.5 font-medium">
-                                <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
-                                <span><i class="fas fa-code-branch text-zoneGlow ml-1"></i>v${mod.version}</span>
-                            </div>
-                            <span class="font-black text-white uppercase text-[9px] bg-white/5 px-2.5 py-0.5 rounded-md border border-white/10">${mod.brand || mod.category}</span>
-                        </div>
-                    </div>
+                <div class="img-layer" id="layer-B-${index}" style="z-index: 2; transform: translate(-10px, -10px) rotate(1.5deg) scale(0.97); opacity: 0.65;">
+                    <img src="${img2}" class="w-full h-full object-cover select-none">
+                </div>
 
-                    <div class="card-back">
-                        <img src="${mod.backImage}" class="w-full h-full object-cover select-none">
-                        <div class="absolute top-3 left-3 bg-zoneBg/80 backdrop-blur-md px-3 py-1 rounded-lg text-[9px] text-zoneGlow font-black border border-white/5 tracking-wider uppercase">
-                            REAR VIEW <i class="fas fa-sync-alt mr-1 text-[8px] animate-spin-slow"></i>
-                        </div>
-                    </div>
+                <div class="img-layer" id="layer-C-${index}" style="z-index: 1; transform: translate(-20px, -20px) rotate(3deg) scale(0.94); opacity: 0.35;">
+                    <img src="${img3}" class="w-full h-full object-cover select-none">
+                </div>
 
+            </div>
+
+            <div class="mt-2 flex flex-col gap-2 px-1">
+                <h3 class="font-black text-sm text-white truncate text-right">${mod.title}</h3>
+                
+                <div class="flex justify-between items-center bg-[#11121c]/80 backdrop-blur-md px-3 py-2 rounded-xl text-[10px] text-gray-400 border border-white/5">
+                    <div class="flex items-center gap-3 font-medium">
+                        <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
+                        <span><i class="fas fa-code-branch text-zoneGlow ml-1"></i>v${mod.version}</span>
+                    </div>
+                    <span class="font-black text-zoneGlow uppercase text-[9px] bg-zoneAccent/10 px-2 py-0.5 rounded-md border border-zoneAccent/20">${mod.brand || mod.category}</span>
                 </div>
             </div>
 
             <div class="w-full flex gap-2">
-                <button onclick="openInfoModal(event, ${index})" title="اطلاعات مود" class="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl flex items-center justify-center text-zoneGlow text-base transition-all shadow-lg active:scale-95">
+                <button onclick="openInfoModal(event, ${index})" title="توضیحات مود" class="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl flex items-center justify-center text-zoneGlow text-base transition-all active:scale-95">
                     <i class="fas fa-bars-staggered"></i>
                 </button>
                 
@@ -264,7 +273,7 @@ function renderCards(mods) {
                     <i class="fas fa-download text-xs"></i> DOWNLOAD MOD
                 </a>
 
-                <button onclick="triggerCardFlip(${index})" title="نمای عقب" class="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl flex items-center justify-center text-amber-400 text-base transition-all shadow-lg active:scale-95">
+                <button onclick="swapCardImages(${index})" title="تصویر بعدی استک" class="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl flex items-center justify-center text-amber-400 text-base transition-all active:scale-95">
                     <i class="fas fa-images"></i>
                 </button>
             </div>
@@ -273,10 +282,49 @@ function renderCards(mods) {
     });
 }
 
-function triggerCardFlip(index) {
+// منطق فوق‌پریمیوم انیمیشن Slanted Swap برای ورق زدن ۳ کارت متوالی
+function swapCardImages(cardIdx) {
     playSound('flip');
-    const card = document.getElementById(`card-${index}`);
-    card.classList.toggle('card-flipped');
+    
+    const layerA = document.getElementById(`layer-A-${cardIdx}`);
+    const layerB = document.getElementById(`layer-B-${cardIdx}`);
+    const layerC = document.getElementById(`layer-C-${cardIdx}`);
+    
+    let currentIdx = cardImageIndexes[cardIdx]; // 0 یا 1 یا 2
+    
+    // مشخص کردن اینکه در حال حاضر کدام المان روی استک (Z-index 3) قرار دارد
+    let topLayer, middleLayer, bottomLayer;
+    
+    if (currentIdx === 0) {
+        topLayer = layerA; middleLayer = layerB; bottomLayer = layerC;
+    } else if (currentIdx === 1) {
+        topLayer = layerB; middleLayer = layerC; bottomLayer = layerA;
+    } else {
+        topLayer = layerC; middleLayer = layerA; bottomLayer = layerB;
+    }
+    
+    // مرحله ۱: فعال کردن افکت فیزیکی خروج کجکی (مورب) برای کارت بالایی
+    topLayer.classList.add('slanted-swap-out');
+    
+    // مرحله ۲: جابجایی ترنزیشن‌ها و تغییر استایل لایه‌های باقی مانده همزمان با خروج کارت اصلی
+    middleLayer.style.zIndex = "3";
+    middleLayer.style.transform = "translate(0px, 0px) scale(1)";
+    middleLayer.style.opacity = "1";
+    
+    bottomLayer.style.zIndex = "2";
+    bottomLayer.style.transform = "translate(-10px, -10px) rotate(1.5deg) scale(0.97)";
+    bottomLayer.style.opacity = "0.65";
+    
+    // مرحله ۳: پس از اتمام انیمیشن خروج، کارت برمی‌گردد و در انتهای استک (Z-index 1) مستقر می‌شود
+    setTimeout(() => {
+        topLayer.style.zIndex = "1";
+        topLayer.style.transform = "translate(-20px, -20px) rotate(3deg) scale(0.94)";
+        topLayer.style.opacity = "0.35";
+        topLayer.classList.remove('slanted-swap-out');
+    }, 500);
+    
+    // بروزرسانی امین امن ایندکس استک کارت برای سیکل‌های بعدی
+    cardImageIndexes[cardIdx] = (currentIdx + 1) % 3;
 }
 
 function filterAndRender() {
@@ -304,7 +352,7 @@ function openInfoModal(event, index) {
     playSound('click');
     event.stopPropagation(); 
     const cardContainer = event.currentTarget.closest('.stagger-card');
-    const cardTitle = cardContainer.querySelector('.pointer-events-none div').innerText.trim();
+    const cardTitle = cardContainer.querySelector('h3').innerText.trim();
     const mod = allMods.find(m => m.title.trim() === cardTitle);
     
     if(!mod) return;
@@ -330,7 +378,6 @@ function closeInfoModal() {
     setTimeout(() => document.getElementById('infoModal').classList.add('hidden'), 200);
 }
 
-// سیستم محاسبه هوشمند و رتبه‌بندی رقابتی ادمین‌ها زنده بر اساس دیتابیس
 function openLeaderboard() {
     playSound('click');
     const counts = {};
@@ -339,7 +386,6 @@ function openLeaderboard() {
         counts[name] = (counts[name] || 0) + 1;
     });
 
-    // تبدیل به آرایه و مرتب‌سازی نزولی بر اساس تعداد پست‌ها
     const sortedAdmins = Object.keys(counts).map(name => {
         return { name: name, count: counts[name] };
     }).sort((a, b) => b.count - a.count);
