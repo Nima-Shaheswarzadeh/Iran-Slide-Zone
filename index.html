@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iran Slide Zone | مرجع مود Assetto Corsa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://v1.fontapi.ir/css/Vazir');
+        body { font-family: 'Vazir', sans-serif; background-color: #0b0f19; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen">
+
+    <header class="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50 px-4 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🏁</span>
+                <h1 class="text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">IRAN SLIDE ZONE</h1>
+            </div>
+            
+            <div class="relative w-full md:w-96">
+                <input type="text" id="searchBar" placeholder="جستجوی ماشین، مپ، گرافیک..." class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none focus:border-orange-500 transition-all">
+                <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <section class="mb-10">
+            <h2 class="text-lg font-bold mb-4 text-gray-400">دسته‌بندی مودها</h2>
+            <div class="flex flex-wrap gap-3" id="categoryFilters">
+                <button data-category="all" class="cat-btn px-5 py-2.5 bg-orange-600 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-orange-600/20">همه مودها</button>
+                <button data-category="cars" class="cat-btn px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-all">🚗 Cars</button>
+                <button data-category="maps" class="cat-btn px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-all">🗺️ Maps</button>
+                <button data-category="csp" class="cat-btn px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-all">👨‍💻 CSP</button>
+                <button data-category="graphics" class="cat-btn px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-all">🌠 Graphics</button>
+                <button data-category="servers" class="cat-btn px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-all">🌐 Servers</button>
+                <button data-category="apps" class="cat-btn px-5 py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-all">📲 Apps</button>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold" id="sectionTitle">همه مودهای موجود</h2>
+                <span id="modCount" class="bg-gray-800 text-xs px-3 py-1.5 rounded-full text-gray-400">0 مود</span>
+            </div>
+            
+            <div id="modsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-gray-900 mt-20 py-6 text-center text-sm text-gray-500">
+        <p>Iran Slide Zone © 2026 - میزبانی روی گیت‌هاب پیجز</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
