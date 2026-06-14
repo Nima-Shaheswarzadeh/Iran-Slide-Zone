@@ -1,14 +1,13 @@
 let allMods = [];
 let currentCategory = 'latest';
 let currentSubFilter = 'all';
-let openCategoryTree = {}; // ذخیره وضعیت باز/بسته بودن منوهای سایدبار به صورت مستقل
+let openCategoryTree = {}; 
 let isMuted = false;
 let currentLang = 'fa'; 
 let cardImageIndexes = {}; 
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// لیست ۷ دسته‌بندی اصلی و استاندارد شما با ترجمه دو زبانه و تصاویر مناسب
 const mainCategories = [
     { id: 'car', labelFa: 'ماشین‌ها', labelEn: 'Cars', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
     { id: 'map', labelFa: 'نقشه‌ها', labelEn: 'Maps', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
@@ -28,7 +27,7 @@ const locales = {
         audioOff: "صدا: خاموش",
         searchPlaceholder: "جستجو پیشرفته در دیتابیس...",
         latestLabel: "جدیدترین‌ها (۹ پست آخر)",
-        adminLeaderboard: "لیدربرد ادمین ها",
+        adminLeaderboard: "لیدربرد ادمین ها", // تصحیح نهایی دکمه هاب
         copyright: "تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.",
         noItem: "هیچ موردی پیدا نشد.",
         downloadMod: "دانلود مود",
@@ -36,7 +35,7 @@ const locales = {
         modalDesc: "توضیحات و بررسی فنی:",
         modalTags: "تگ‌های متادیتا:",
         modalDev: "سازنده مود",
-        activeMods: "پست", // کلمه پست جایگزین مود فعال شد
+        activeMods: "پست", 
         exitHub: "خروج از هاب"
     },
     en: {
@@ -140,14 +139,14 @@ const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_I
 
 async function init() {
     document.getElementById('htmlTag').classList.add('dark'); 
-    mainCategories.forEach(c => openCategoryTree[c.id] = false); // ریست وضعیت فولدرها
+    mainCategories.forEach(c => openCategoryTree[c.id] = false); 
     await fetchModsFromSheets();
     renderCategoriesMenu();
     window.addEventListener('hashchange', handleRouting);
     handleRouting(); 
 }
 
-// 🎯 آنالیز چیدمان جدید و دقیق ۱۵ ستون گوگل شیت شما بدون پس و پیش شدن اطلاعات
+// 🎯 اعمال جابه‌جایی ادمین و کریتور بر اساس تغییر چیدمان دیتابیس جدید شما
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -167,12 +166,12 @@ async function fetchModsFromSheets() {
                 image2: cells[6] ? String(cells[6].v) : '',
                 image3: cells[7] ? String(cells[7].v) : '',
                 size: cells[8] ? String(cells[8].v) : '',
-                creator: cells[9] ? String(cells[9].v) : 'Unknown', // ستون 9 سازنده مود
-                download: cells[10] ? String(cells[10].v) : '#',     // ستون 10 لینک دانلود
-                description: cells[11] ? String(cells[11].v) : '',  // ستون 11 توضیحات فنی
-                adminName: cells[12] ? String(cells[12].v) : 'Admin', // ستون 12 ادمین پست‌گذار
-                tags: cells[13] ? String(cells[13].v).split(',').map(t => t.trim()) : ['mod'], // ستون 13 تگ‌ها
-                password: cells[14] ? String(cells[14].v) : ''       // ستون 14 پسورد اختصاصی فایل
+                adminName: cells[9] ? String(cells[9].v) : 'Admin', // جابجا شده به ستون ۹ طبق دستور شما
+                download: cells[10] ? String(cells[10].v) : '#',     
+                description: cells[11] ? String(cells[11].v) : '',  
+                creator: cells[12] ? String(cells[12].v) : 'Unknown', // جابجا شده به ستون ۱۲ طبق دستور شما
+                tags: cells[13] ? String(cells[13].v).split(',').map(t => t.trim()) : ['mod'], 
+                password: cells[14] ? String(cells[14].v) : ''       
             };
         }).filter(item => item.id && item.title).reverse(); 
     } catch (e) { console.error(e); }
@@ -240,7 +239,6 @@ function renderExplorerTree() {
             subItemsHtml += `</div>`;
         }
 
-        // توسعه سیستم فلش جداگانه جهت عدم تداخل باز کردن کشو با فیلتر کلی دسته بندی
         treeContainer.innerHTML += `
             <div class="flex flex-col">
                 <div class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all ${catClass}">
@@ -259,7 +257,7 @@ function renderExplorerTree() {
 }
 
 function toggleTreeFolder(event, catId) {
-    event.stopPropagation(); // جلوگیری از اجرای کلیک دسته بندی اصلی
+    event.stopPropagation(); 
     playSound('click');
     openCategoryTree[catId] = !openCategoryTree[catId];
     renderExplorerTree();
@@ -311,7 +309,6 @@ function renderCards(mods) {
     }
 
     mods.forEach((mod) => {
-        // پیدا کردن ایندکس واقعی از آرایه کل به جهت ارجاع بی نقص عکس‌ها و مودال
         const trueGlobalIndex = allMods.findIndex(m => m.id === mod.id);
         cardImageIndexes[trueGlobalIndex] = 0;
 
@@ -373,19 +370,17 @@ function renderCards(mods) {
     });
 }
 
-// کپی کردن فیلد پسورد به صورت کاملاً ایزوله بدون دستکاری دیتاهای دیگر شیت
 function copyPassword(event, pass) {
     event.stopPropagation();
     playSound('click');
     if(!pass) return;
     navigator.clipboard.writeText(pass).then(() => {
-        // کپی بی نقص در پس زمینه بدون مزاحمت اعلان ها انجام پذیرفت.
+        // کپی با موفقیت انجام شد
     }).catch(err => console.error(err));
 }
 
 function swapCardImages(cardIdx) {
     playSound('flip');
-    
     const layerA = document.getElementById(`layer-A-${cardIdx}`);
     const layerB = document.getElementById(`layer-B-${cardIdx}`);
     const layerC = document.getElementById(`layer-C-${cardIdx}`);
@@ -404,7 +399,6 @@ function swapCardImages(cardIdx) {
     middleLayer.style.zIndex = "3";
     middleLayer.style.transform = "translate(0px, 0px) scale(1)";
     middleLayer.style.opacity = "1";
-    
     bottomLayer.style.zIndex = "2";
     bottomLayer.style.transform = "translate(-10px, -10px) rotate(1.5deg) scale(0.97)";
     bottomLayer.style.opacity = "0.65";
@@ -419,6 +413,7 @@ function swapCardImages(cardIdx) {
     cardImageIndexes[cardIdx] = (currentIdx + 1) % 3;
 }
 
+// 🎯 اصلاح کامل منطق فیلتر جهت بارگذاری دقیق بدون جا افتادن هیچ کدهای کتگوری
 function filterAndRender() {
     const search = document.getElementById('searchBar').value.toLowerCase();
     let filtered = [];
@@ -427,8 +422,8 @@ function filterAndRender() {
         filtered = allMods.slice(0, 9);
     } else {
         filtered = allMods.filter(m => {
-            const matchCat = (m.category === currentCategory);
-            const matchSub = (currentSubFilter === 'all' || m.brand === currentSubFilter || m.subcategory === currentSubFilter);
+            const matchCat = (m.category === currentCategory.toLowerCase().trim());
+            const matchSub = (currentSubFilter === 'all' || m.brand.toLowerCase() === currentSubFilter.toLowerCase() || m.subcategory.toLowerCase() === currentSubFilter.toLowerCase());
             return matchCat && matchSub;
         });
     }
@@ -440,7 +435,6 @@ function filterAndRender() {
     renderCards(filtered);
 }
 
-// 🎯 پاپ آپ پایش فنی اطلاعات (سازنده اصلی مود و تگ‌ها فقط درون این منو رندر می‌شوند)
 function openInfoModal(event, index) {
     playSound('click');
     event.stopPropagation(); 
@@ -450,7 +444,7 @@ function openInfoModal(event, index) {
 
     document.getElementById('infoModalTitle').innerText = mod.title.toUpperCase();
     document.getElementById('infoModalDesc').innerText = mod.description || "...";
-    document.getElementById('infoModalCreator').innerText = mod.creator; // نمایش نام دقیق سازنده (Creator) ستون ۹
+    document.getElementById('infoModalCreator').innerText = mod.creator; 
     document.getElementById('infoModalCategory').innerText = mod.category.toUpperCase();
     
     const tagsBox = document.getElementById('infoModalTags'); tagsBox.innerHTML = '';
