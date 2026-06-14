@@ -37,7 +37,6 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* انیمیشن جریان خطی نئونی لودینگ گوگل */
         @keyframes neonFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -51,7 +50,6 @@
             animation: neonFlow 5s linear infinite;
         }
 
-        /* طناب متصل کننده باکس عنوان */
         .hanging-string {
             position: absolute;
             bottom: -16px;
@@ -96,14 +94,25 @@
         }
         @keyframes cardEntrance { to { opacity: 1; transform: translateY(0); } }
 
-        .btn-download-unique {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
-            transition: all 0.25s ease;
+        /* انیمیشن RGB تیره برای دکمه دانلود جهت حفظ خوانایی متن و عدم ایجاد خستگی چشم */
+        @keyframes darkRGBWave {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .btn-download-unique:hover {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+
+        .btn-download-rgb {
+            background: linear-gradient(90deg, #1e1b4b, #2e1065, #031e1a, #1a0c2e, #1e1b4b);
+            background-size: 300% 300%;
+            animation: darkRGBWave 6s ease infinite;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-download-rgb:hover {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            transform: translateY(-1px);
         }
 
         .submenu-transition {
