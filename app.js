@@ -1,9 +1,8 @@
 let allMods = [];
-let currentCategory = 'all';
+let currentCategory = 'latest';
 let currentSubFilter = 'all';
-let openCategoryTree = null; // برای ثبت دسته‌بندی باز شده در سایدبار
+let openCategoryTree = null;   
 
-// شناسه گوگل شیت شما به صورت اختصاصی ست شد:
 const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA"; 
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
@@ -20,7 +19,40 @@ const mainCategories = [
 async function init() {
     await fetchModsFromSheets();
     renderCategoriesMenu();
-    showPage('welcomePage');
+    
+    // گوش به زنگ بودن تغییرات هش URL برای جلوگیری از پریدن صفحه موقع رفرش
+    window.addEventListener('hashchange', handleRouting);
+    handleRouting(); 
+}
+
+// سیستم مسیردهی بر پایه هش (SPA Hash Router) کاملا پیشرفته
+function handleRouting() {
+    const hash = window.location.hash || '#home';
+    
+    if (hash === '#home') {
+        showPage('welcomePage');
+    } else if (hash === '#categories') {
+        showPage('categoriesPage');
+    } else if (hash.startsWith('#gallery')) {
+        // ساختار هش: #gallery/cars/IKCO
+        const parts = hash.split('/');
+        currentCategory = parts[1] || 'latest';
+        currentSubFilter = parts[2] || 'all';
+        if(currentCategory !== 'latest') openCategoryTree = currentCategory;
+        
+        showPage('galleryPage');
+        renderExplorerTree();
+        filterAndRender();
+    }
+}
+
+function navigateTo(state, cat = '', sub = '') {
+    if (state === 'home') window.location.hash = '#home';
+    else if (state === 'categories') window.location.hash = '#categories';
+    else if (state === 'gallery') {
+        if (cat === 'latest') window.location.hash = '#gallery/latest';
+        else if (cat) window.location.hash = `#gallery/${cat}/${sub || 'all'}`;
+    }
 }
 
 async function fetchModsFromSheets() {
@@ -50,9 +82,9 @@ async function fetchModsFromSheets() {
                 },
                 tags: cells[12] ? String(cells[12].v).split(',').map(t => t.trim()) : ['mod']
             };
-        }).filter(item => item.id && item.title);
+        }).filter(item => item.id && item.title).reverse(); 
     } catch (e) {
-        console.error("خطا در لود زنده داده‌ها از گوگل شیت:", e);
+        console.error("خطا در ارتباط با شیت:", e);
     }
 }
 
@@ -61,50 +93,55 @@ function renderCategoriesMenu() {
     grid.innerHTML = '';
     mainCategories.forEach(cat => {
         grid.innerHTML += `
-            <div onclick="openCategory('${cat.id}')" class="relative h-32 rounded-2xl overflow-hidden cursor-pointer group border border-gray-800/70 shadow-md">
-                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 group-hover:opacity-15 transition-all duration-500 blur-[1px]">
-                <div class="absolute inset-0 bg-gradient-to-t from-brandBg via-brandBg/30 to-transparent flex flex-col justify-end p-4">
-                    <span class="text-lg mb-1">${cat.icon}</span>
-                    <h3 class="font-bold text-xs text-brandBlue">${cat.label}</h3>
+            <div onclick="navigateTo('gallery', '${cat.id}')" class="relative h-28 rounded-xl overflow-hidden cursor-pointer group border border-[#1e2030] bg-[#12131c]">
+                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:scale-105 group-hover:opacity-5 transition-all duration-300 blur-[1px]">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0b0c10] to-transparent flex flex-col justify-end p-4">
+                    <span class="text-base mb-1">${cat.icon}</span>
+                    <h3 class="font-bold text-xs text-white">${cat.label}</h3>
                 </div>
             </div>
         `;
     });
 }
 
-// ساخت سیستم منوی درختی سایدبار (مشابه فایل اکسپلورر ویندوز)
+// رندر سایدبار منیجر همراه با شمارشگر و افکت آکاردئونی بسیار روان
 function renderExplorerTree() {
     const treeContainer = document.getElementById('explorerTree');
     treeContainer.innerHTML = '';
 
-    // گزینه نمایش همه موارد در بالای فایل اکسپلورر
-    const allActive = (currentCategory === 'all') ? 'bg-brandBlue text-brandDark font-bold' : 'text-gray-400 hover:bg-brandDark/50';
+    const latestActive = (currentCategory === 'latest') ? 'bg-cmAccent text-white font-bold' : 'text-gray-400 hover:bg-[#1e2030]/50';
     treeContainer.innerHTML += `
-        <div onclick="selectTreeCategory('all')" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${allActive}">
-            <i class="fas fa-hdd"></i> <span>Root (همه مودها)</span>
+        <div onclick="navigateTo('gallery', 'latest')" class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-all ${latestActive}">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-history text-[11px]"></i> <span>جدیدترین مودها (۹ اخیر)</span>
+            </div>
+            <span class="text-[9px] bg-[#0b0c10]/60 px-1.5 py-0.5 rounded text-gray-400">${Math.min(allMods.length, 9)}</span>
         </div>
     `;
 
     mainCategories.forEach(cat => {
-        const isCurrent = (currentCategory === cat.id);
+        const isCurrentCat = (currentCategory === cat.id);
         const isOpen = (openCategoryTree === cat.id);
-        const catClass = isCurrent ? 'bg-brandDark text-brandBlue font-bold border-r-2 border-brandBlue' : 'text-gray-400 hover:bg-brandDark/40';
+        const catClass = (isCurrentCat && currentSubFilter === 'all') ? 'bg-[#1e2030] text-cmAccent font-bold' : 'text-gray-400 hover:bg-[#1e2030]/40';
         
         let subItemsHtml = '';
-        
-        // اگر دسته بندی باز بود، زیر مجموعه‌ها (برند یا کشور) رندر شوند
-        if (isOpen) {
-            let subs = [];
-            if (cat.id === 'cars') subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
-            if (cat.id === 'maps') subs = [...new Set(allMods.filter(m => m.category === 'maps').map(m => m.subcategory))].filter(Boolean);
+        let subs = [];
+        if (cat.id === 'cars') subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
+        if (cat.id === 'maps') subs = [...new Set(allMods.filter(m => m.category === 'maps').map(m => m.subcategory))].filter(Boolean);
 
-            subItemsHtml = `<div class="flex flex-col pr-4 mt-1 gap-0.5 border-r border-gray-800/60 mr-2">`;
+        if (subs.length > 0) {
+            subItemsHtml = `<div id="sub-folder-${cat.id}" class="submenu-transition ${isOpen ? 'submenu-open' : ''} flex flex-col pr-4 my-0.5 border-r border-[#1e2030] mr-2 gap-0.5">`;
             subs.forEach(sub => {
-                const isSubActive = (currentSubFilter === sub);
-                const subClass = isSubActive ? 'text-brandBlue font-bold bg-brandBlue/5' : 'text-gray-500 hover:text-gray-300';
+                const isSubActive = (currentCategory === cat.id && currentSubFilter === sub);
+                const subClass = isSubActive ? 'text-cmAccent font-bold bg-cmAccent/5' : 'text-gray-500 hover:text-gray-300';
+                const count = allMods.filter(m => m.category === cat.id && (m.brand === sub || m.subcategory === sub)).length;
+
                 subItemsHtml += `
-                    <div onclick="selectTreeSub('${cat.id}', '${sub}', event)" class="px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-all flex items-center gap-1.5 ${subClass}">
-                        <i class="fas fa-angle-left text-[9px]"></i> <span>${sub}</span>
+                    <div onclick="navigateTo('gallery', '${cat.id}', '${sub}')" class="px-2 py-1.5 rounded-md text-[11px] cursor-pointer transition-all flex items-center justify-between ${subClass}">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-folder text-[10px] opacity-60"></i> <span>${sub}</span>
+                        </div>
+                        <span class="text-[8px] font-mono opacity-40">${count}</span>
                     </div>
                 `;
             });
@@ -112,17 +149,28 @@ function renderExplorerTree() {
         }
 
         treeContainer.innerHTML += `
-            <div class="flex flex-col">
-                <div onclick="toggleTreeCategory('${cat.id}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${catClass}">
+            <div class="flex flex-col mt-0.5">
+                <div onclick="toggleTreeFolder('${cat.id}')" class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-all ${catClass}">
                     <div class="flex items-center gap-2">
-                        <span>${cat.icon}</span> <span>${cat.label}</span>
+                        <span class="text-xs">${cat.icon}</span> <span>${cat.label}</span>
                     </div>
-                    <i class="fas ${isOpen ? 'fa-chevron-down' : 'fa-chevron-left'} text-[10px] opacity-60"></i>
+                    <i class="fas ${isOpen ? 'fa-chevron-down' : 'fa-chevron-left'} text-[8px] opacity-40"></i>
                 </div>
                 ${subItemsHtml}
             </div>
         `;
     });
+}
+
+// مدیریت باز و بسته شدن پوشه با قابلیت انیمیشن آکاردئونی و لغو فیلتر ریز
+function toggleTreeFolder(catId) {
+    if (openCategoryTree === catId) {
+        openCategoryTree = null;
+        navigateTo('gallery', catId, 'all');
+    } else {
+        openCategoryTree = catId;
+        navigateTo('gallery', catId, 'all');
+    }
 }
 
 function showPage(pageId) {
@@ -135,48 +183,7 @@ function showPage(pageId) {
     if (pageId === 'galleryPage') document.getElementById('mainHeader').classList.remove('hidden');
 }
 
-function openCategory(catId) {
-    currentCategory = catId;
-    openCategoryTree = catId; // خودکار زیرمنو باز شود
-    currentSubFilter = 'all';
-    showPage('galleryPage');
-    renderExplorerTree();
-    filterAndRender();
-}
-
-// مدیریت کلیک روی دسته‌بندی اصلی در سایدبار
-function toggleTreeCategory(catId) {
-    if (openCategoryTree === catId) {
-        // کلیک مجدد: بستن زیرمجموعه و نشان دادن کل موارد دسته‌بندی بدون فیلتر فرعی
-        openCategoryTree = null;
-        currentCategory = catId;
-        currentSubFilter = 'all';
-    } else {
-        openCategoryTree = catId;
-        currentCategory = catId;
-        currentSubFilter = 'all';
-    }
-    renderExplorerTree();
-    filterAndRender();
-}
-
-function selectTreeCategory(catId) {
-    currentCategory = catId;
-    openCategoryTree = (catId === 'all') ? null : catId;
-    currentSubFilter = 'all';
-    renderExplorerTree();
-    filterAndRender();
-}
-
-function selectTreeSub(catId, subName, event) {
-    event.stopPropagation(); // جلوگیری از بسته شدن منوی مادری
-    currentCategory = catId;
-    currentSubFilter = subName;
-    renderExplorerTree();
-    filterAndRender();
-}
-
-// رندر فلش کارت‌ها با لبه‌های کاملاً گرد، نسبت عکس ۴:۳ افقی، و دکمه‌های پایینی ثابت در لایه بیرونی
+// رندر کارت‌ها بر اساس استاندارد کاملا جدید فیکس شده (تمام مشخصات فنی روی کارت)
 function renderCards(mods) {
     const grid = document.getElementById('modsGrid');
     grid.innerHTML = '';
@@ -188,32 +195,39 @@ function renderCards(mods) {
 
     mods.forEach((mod, index) => {
         const cardBox = document.createElement('div');
-        cardBox.className = "flex flex-col gap-3"; // سبد نگه‌دارنده کارت و دکمه‌ها برای چسبیدن به هم
+        cardBox.className = "flex flex-col gap-3.5"; 
         
         cardBox.innerHTML = `
-            <div class="card-perspective h-56 w-full relative">
-                <div class="absolute -top-10 left-0 right-0 z-20 flex justify-center">
-                    <div class="acrylic border border-gray-800/80 text-gray-200 text-[11px] font-bold px-4 py-1.5 rounded-xl shadow-lg truncate max-w-[85%] text-center">
+            <div class="card-perspective h-52 w-full relative">
+                <div class="absolute -top-10 left-0 right-0 z-20 flex justify-between px-2 pointer-events-none">
+                    <div class="pill-anim bg-[#12131c]/90 border border-[#1e2030] text-white text-[11px] font-bold px-3.5 py-1.5 rounded-xl shadow-md truncate max-w-[60%]">
                         ${mod.title}
+                    </div>
+                    <div class="pill-anim bg-[#12131c]/90 border border-[#1e2030] text-gray-300 text-[10px] px-3 py-1.5 rounded-xl shadow-md flex items-center gap-1.5 max-w-[38%]" style="animation-delay: 0.1s;">
+                        <img src="${mod.author.avatar}" class="w-3.5 h-3.5 rounded-full bg-[#0b0c10]">
+                        <span class="truncate text-cmAccent font-bold">By ${mod.author.name}</span>
                     </div>
                     <div class="flow-line h-4 -bottom-4"></div>
                 </div>
 
                 <div class="card-inner w-full h-full cursor-pointer" id="card-${index}" onclick="handleCardClick(event, ${index})">
                     
-                    <div class="card-front bg-brandDark/40 border border-gray-800/60 relative">
-                        <img src="${mod.image}" class="w-full h-full object-cover" loading="lazy">
-                        <div class="absolute bottom-2 right-2 left-2 flex justify-between items-center bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] text-gray-400">
-                            <span><i class="fas fa-hdd ml-1 text-brandBlue"></i>${mod.size}</span>
-                            <span class="uppercase text-brandBlue font-bold">${mod.brand || mod.category}</span>
+                    <div class="card-front bg-[#12131c] border border-[#1e2030]">
+                        <img src="${mod.image}" class="w-full h-full object-cover select-none" loading="lazy">
+                        
+                        <div class="absolute bottom-2 right-2 left-2 flex justify-between items-center bg-[#0b0c10]/85 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] text-gray-300 border border-[#1e2030]/60">
+                            <div class="flex items-center gap-3">
+                                <span><i class="fas fa-hdd text-cmAccent ml-1"></i>${mod.size}</span>
+                                <span><i class="fas fa-code-branch text-cmAccent ml-1"></i>v${mod.version}</span>
+                            </div>
+                            <span class="font-bold text-white uppercase text-[9px] bg-cmAccent/30 px-2 py-0.5 rounded-md border border-cmAccent/20">${mod.brand || mod.category}</span>
                         </div>
                     </div>
 
-                    <div class="card-back bg-brandDark/50 border border-brandBlue/20 relative">
-                        <img src="${mod.backImage}" class="w-full h-full object-cover" loading="lazy">
-                        <div class="absolute bottom-2 right-2 left-2 flex justify-between items-center bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] text-gray-400">
-                            <span><i class="fas fa-code-branch ml-1 text-brandBlue"></i>v${mod.version}</span>
-                            <span class="text-emerald-400">نمای عقب <i class="fas fa-sync mr-1"></i></span>
+                    <div class="card-back bg-[#12131c] border border-cmAccent/20">
+                        <img src="${mod.backImage}" class="w-full h-full object-cover select-none" loading="lazy">
+                        <div class="absolute top-2 left-2 bg-[#0b0c10]/70 backdrop-blur-sm px-2 py-0.5 rounded-md text-[9px] text-cmAccent font-bold border border-[#1e2030]">
+                            نمای عقب <i class="fas fa-sync-alt mr-1 text-[8px]"></i>
                         </div>
                     </div>
 
@@ -221,11 +235,11 @@ function renderCards(mods) {
             </div>
 
             <div class="w-full flex gap-2">
-                <button onclick="openInfoModal(event, ${index})" class="w-11 h-11 bg-brandDark/60 hover:bg-brandDark border border-gray-800 rounded-xl flex items-center justify-center text-brandBlue text-sm transition-all shadow-md">
-                    <i class="fas fa-info-circle"></i>
+                <button onclick="openInfoModal(event, ${index})" class="w-11 h-11 bg-[#12131c] hover:bg-[#1e2030] border border-[#1e2030] rounded-xl flex items-center justify-center text-cmAccent text-base transition-all shadow-md group">
+                    <i class="fas fa-info-circle group-hover:scale-110 transition-transform"></i>
                 </button>
-                <a href="${mod.download}" target="_blank" onclick="event.stopPropagation();" class="flex-1 h-11 bg-brandBlue hover:bg-blue-600 text-brandDark font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-brandBlue/5 transition-all">
-                    <i class="fas fa-cloud-download-alt"></i> دانلود مستقیم مود
+                <a href="${mod.download}" target="_blank" onclick="event.stopPropagation();" class="btn-download-glow flex-1 h-11 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2">
+                    <i class="fas fa-cloud-download-alt animate-bounce"></i> دانلود مستقیم مود
                 </a>
             </div>
         `;
@@ -240,20 +254,33 @@ function handleCardClick(event, index) {
 
 function filterAndRender() {
     const search = document.getElementById('searchBar').value.toLowerCase();
-    const filtered = allMods.filter(m => {
-        const matchCat = (currentCategory === 'all' || m.category === currentCategory);
-        const matchSub = (currentSubFilter === 'all' || m.brand === currentSubFilter || m.subcategory === currentSubFilter);
-        const matchSearch = m.title.toLowerCase().includes(search) || m.tags.some(t => t.toLowerCase().includes(search));
-        return matchCat && matchSub && matchSearch;
-    });
+    let filtered = [];
+
+    if (currentCategory === 'latest') {
+        filtered = allMods.slice(0, 9);
+    } else {
+        filtered = allMods.filter(m => {
+            const matchCat = (m.category === currentCategory);
+            const matchSub = (currentSubFilter === 'all' || m.brand === currentSubFilter || m.subcategory === currentSubFilter);
+            return matchCat && matchSub;
+        });
+    }
+
+    if (search) {
+        filtered = filtered.filter(m => m.title.toLowerCase().includes(search) || m.tags.some(t => t.toLowerCase().includes(search)));
+    }
+
     renderCards(filtered);
 }
 
-// مدیریت کلیک دکمه اطلاعات و لود محتوایی درون پاپ‌آپ
 function openInfoModal(event, index) {
-    event.stopPropagation(); // جلوگیری از چرخش کارت پشت دکمه
-    const mod = allMods[index];
+    event.stopPropagation(); 
+    const cardContainer = event.currentTarget.closest('.flex-col');
+    const cardTitle = cardContainer.querySelector('.pill-anim').innerText.trim();
+    const mod = allMods.find(m => m.title.trim() === cardTitle);
     
+    if(!mod) return;
+
     document.getElementById('infoModalTitle').innerText = mod.title;
     document.getElementById('infoModalDesc').innerText = mod.description || "توضیحاتی برای این مود ثبت نشده است.";
     document.getElementById('infoModalAuthor').innerText = mod.author.name;
@@ -263,7 +290,7 @@ function openInfoModal(event, index) {
     const tagsBox = document.getElementById('infoModalTags');
     tagsBox.innerHTML = '';
     mod.tags.forEach(t => {
-        if(t) tagsBox.innerHTML += `<span class="bg-brandDark border border-gray-800 text-gray-400 text-[10px] px-2 py-0.5 rounded-md">#${t}</span>`;
+        if(t) tagsBox.innerHTML += `<span class="bg-[#0b0c10] border border-[#1e2030] text-gray-400 text-[10px] px-2 py-0.5 rounded-md">#${t}</span>`;
     });
 
     document.getElementById('infoModal').classList.remove('hidden');
