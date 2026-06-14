@@ -5,7 +5,7 @@ let openCategoryTree = {};
 let isMuted = false;
 let currentLang = 'fa'; 
 let cardImageIndexes = {}; 
-let isDatabaseLoaded = false; // پرچم بررسی بارگذاری نهایی داده‌ها
+let isDatabaseLoaded = false;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -39,7 +39,8 @@ const locales = {
         modalTags: "تگ‌های متادیتا:",
         modalDev: "سازنده مود:",
         activeMods: "پست", 
-        exitHub: "خروج از هاب"
+        exitHub: "خروج از هاب",
+        btnLeaderboardText: "لیدربرد"
     },
     en: {
         title: "IRAN SLIDE ZONE",
@@ -60,7 +61,8 @@ const locales = {
         modalTags: "Metadata Tags:",
         modalDev: "Developer:",
         activeMods: "Post",
-        exitHub: "Exit Mod Hub"
+        exitHub: "Exit Mod Hub",
+        btnLeaderboardText: "Leaderboard"
     }
 };
 
@@ -123,12 +125,12 @@ function updateDOMTranslations() {
     document.getElementById('lblAudioState').innerText = isMuted ? t.audioOff : t.audioOn;
     document.getElementById('searchBar').placeholder = t.searchPlaceholder;
     document.getElementById('mainFooter').innerText = t.copyright;
-    document.getElementById('sideLeaderboardBtn').querySelector('span').innerText = t.adminLeaderboard;
     document.getElementById('explorerTitleTag').querySelector('span').innerText = t.explorerTitle;
     document.getElementById('lbPopupTitle').innerHTML = `<i class="fas fa-crown text-xs"></i> ` + t.popupLeaderboardTitle;
     document.getElementById('modalDescTitle').innerText = t.modalDesc;
     document.getElementById('modalTagsTitle').innerText = t.modalTags;
     document.getElementById('modalDevTitle').innerText = t.modalDev;
+    document.getElementById('lblLeaderboard').innerText = t.btnLeaderboardText;
     document.getElementById('exitHubBtn').innerHTML = currentLang==='fa' ? '<i class="fas fa-arrow-right ml-1"></i> خروج از هاب' : 'Exit Mod Hub <i class="fas fa-arrow-left ml-1"></i>';
 
     renderCategoriesMenu();
@@ -154,7 +156,6 @@ async function init() {
     handleRouting(); 
     updateDOMTranslations();
 
-    // شروع فرآیند دریافت موازی داده‌ها از شیت
     await fetchModsFromSheets();
 }
 
@@ -186,7 +187,7 @@ async function fetchModsFromSheets() {
             };
         }).filter(item => item.id && item.title).reverse(); 
         
-        isDatabaseLoaded = true; // تغییر وضعیت لودینگ به پایان یافته
+        isDatabaseLoaded = true;
         renderExplorerTree();
         filterAndRender();
     } catch (e) { console.error(e); }
@@ -317,14 +318,13 @@ function showPage(pageId) {
     if (pageId === 'galleryPage') document.getElementById('mainHeader').classList.remove('hidden');
 }
 
-// 🎯 لودینگ اسکلتون متحرک پیشرفته برای لودهای سنگین دیتابیس
 function renderSkeletonLoaders() {
     const grid = document.getElementById('modsGrid');
     grid.innerHTML = '';
     for(let i=0; i<6; i++) {
         grid.innerHTML += `
             <div class="flex flex-col gap-3 relative pt-4 opacity-70">
-                <div class="skeleton-block w-32 h-6 mx-auto rounded-full"></div>
+                <div class="skeleton-block w-40 h-8 mx-auto rounded-full"></div>
                 <div class="skeleton-block w-full h-[210px] rounded-[1.5rem]"></div>
                 <div class="skeleton-block w-full h-8 rounded-xl mt-1"></div>
                 <div class="flex gap-2 w-full">
@@ -362,8 +362,9 @@ function renderCards(mods) {
         const currentCatObj = mainCategories.find(c => c.id === mod.category);
         const displayLabel = currentCatObj ? (currentLang === 'fa' ? currentCatObj.labelFa : currentCatObj.labelEn) : mod.category;
 
+        // 🎯 باکس متادیتای یکپارچه، نام مود ارتقایافته و دکمه دانلود دائمی انیمیشنی رندر می‌شوند
         cardBox.innerHTML = `
-            <div class="absolute top-[-20px] left-1/2 -translate-x-1/2 z-20 bg-slate-900 dark:bg-slate-950 text-white border border-indigo-500/40 px-4 py-1 rounded-full text-[11px] font-black shadow-lg whitespace-nowrap">
+            <div class="absolute top-[-24px] left-1/2 -translate-x-1/2 z-20 bg-slate-900 dark:bg-slate-950 text-white border-2 border-indigo-500/50 px-6 py-1.5 rounded-full text-xs sm:text-sm font-black shadow-2xl tracking-wide whitespace-nowrap">
                 ${mod.title}
                 <div class="hanging-string"></div>
             </div>
@@ -381,12 +382,12 @@ function renderCards(mods) {
             </div>
 
             <div class="mt-0.5 flex flex-col gap-2 px-1">
-                <div class="flex justify-between items-center dark:bg-zoneBg bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 dark:border-white/5 border-black/5 shadow-sm">
-                    <div class="flex items-center gap-3 font-medium">
+                <div class="flex justify-between items-center dark:bg-zoneBgMuted/60 bg-black/5 backdrop-blur-md px-3 py-2.5 rounded-xl text-[11px] text-gray-500 dark:text-gray-400 shadow-sm border dark:border-white/5 border-black/5">
+                    <div class="flex items-center gap-4 font-bold">
                         <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
-                        <span class="text-indigo-400 font-bold"><i class="fas fa-user-shield ml-1"></i>${mod.adminName}</span>
+                        <span class="text-indigo-500 dark:text-indigo-400"><i class="fas fa-user-shield ml-1"></i>${mod.adminName}</span>
                     </div>
-                    <span class="font-black text-zoneGlow uppercase text-[9px] bg-zoneAccent/10 px-2 py-0.5 rounded-md border border-zoneAccent/20">${mod.brand || displayLabel}</span>
+                    <span class="font-black text-zoneGlow uppercase text-[10px] bg-zoneAccent/10 px-2.5 py-0.5 rounded-md border border-zoneAccent/20">${mod.brand || mod.subcategory || displayLabel}</span>
                 </div>
             </div>
 
@@ -449,7 +450,6 @@ function swapCardImages(cardIdx) {
 }
 
 function filterAndRender() {
-    // اگر هنوز دیتابیس لود نشده، لودینگ مجازی را نمایش بده
     if (!isDatabaseLoaded) {
         renderSkeletonLoaders();
         return;
@@ -483,7 +483,7 @@ function openInfoModal(event, index) {
     if(!mod) return;
 
     const currentCatObj = mainCategories.find(c => c.id === mod.category);
-    const displayLabel = currentCatObj ? (currentLang === 'fa' ? currentCatObj.labelFa : currentLang === 'fa' ? currentCatObj.labelFa : currentCatObj.labelEn) : mod.category;
+    const displayLabel = currentCatObj ? (currentLang === 'fa' ? currentCatObj.labelFa : currentCatObj.labelEn) : mod.category;
 
     document.getElementById('infoModalTitle').innerText = mod.title.toUpperCase();
     document.getElementById('infoModalDesc').innerText = mod.description || "...";
