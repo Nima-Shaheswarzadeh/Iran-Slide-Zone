@@ -11,9 +11,10 @@
             theme: {
                 extend: {
                     colors: {
-                        brandDark: '#101A40',
-                        brandBlue: '#6496FF',
-                        brandBg: '#090F26'
+                        cmBg: '#111214',      /* مشکی عمیق محیط بازی */
+                        cmCard: '#1e2024',    /* زغال‌سنگی مات و شیک */
+                        cmAccent: '#5865f2',  /* رنگ اصلی ملایم و حرفه‌ای */
+                        cmText: '#dbdee1'     /* سفید مات برای خسته نشدن چشم */
                     }
                 }
             }
@@ -21,86 +22,91 @@
     </script>
     <style>
         @import url('https://v1.fontapi.ir/css/Vazir');
-        body { font-family: 'Vazir', sans-serif; background-color: #090F26; overflow-x: hidden; }
+        body { 
+            font-family: 'Vazir', sans-serif; 
+            background-color: #111214; 
+            color: #dbdee1;
+            overflow-x: hidden; 
+        }
         
-        /* پس‌زمینه متحرک لوپ */
+        /* بک‌گراند مینیمال و بسیار ملایم متحرک دورانی */
         .bg-animation {
             position: fixed; top: -50%; left: -50%; right: -50%; bottom: -50%;
-            background: radial-gradient(circle at 30% 30%, rgba(100, 150, 255, 0.05) 0%, transparent 40%),
-                        radial-gradient(circle at 70% 70%, rgba(16, 26, 64, 0.4) 0%, transparent 50%);
-            animation: spinBg 30s linear infinite; z-index: -1; pointer-events: none;
+            background: radial-gradient(circle at 30% 30%, rgba(88, 101, 242, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(30, 32, 36, 0.3) 0%, transparent 60%);
+            animation: spinBg 40s linear infinite; z-index: -1; pointer-events: none;
         }
         @keyframes spinBg { 100% { transform: rotate(360deg); } }
 
-        .acrylic { background: rgba(16, 26, 64, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        
-        /* افکت ۳ بعدی برجسته فلش‌کارت با لبه‌های گرد */
-        .card-perspective { perspective: 1500px; }
+        /* ساختار سه‌بعدی اصلاح شده بدون باگ و پرش */
+        .card-perspective { perspective: 2000px; }
         .card-inner {
             position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 25px rgba(100, 150, 255, 0.05);
-            border-radius: 1.5rem;
-        }
-        .card-inner:hover {
-            box-shadow: 0 30px 50px rgba(0,0,0,0.6), 0 0 35px rgba(100, 150, 255, 0.15);
+            transform-style: preserve-3d; 
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 1rem;
         }
         .card-flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { position: relative; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 1.5rem; overflow: hidden; }
-        .card-back { transform: rotateY(180deg); position: absolute; top: 0; left: 0; }
         
-        /* خط اتصال فلوچارتی گرد شده */
-        .flow-line { position: absolute; width: 2px; background: linear-gradient(to bottom, #6496FF, rgba(100, 150, 255, 0.05)); left: 50%; transform: translateX(-50%); }
+        .card-front, .card-back { 
+            position: absolute; inset: 0; width: 100%; height: 100%; 
+            backface-visibility: hidden; 
+            -webkit-backface-visibility: hidden;
+            border-radius: 1rem; overflow: hidden; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .card-back { transform: rotateY(180deg); }
         
-        /* اسکرول‌بار مخفی و ظریف سایدبار */
+        /* خط اتصال فلوچارت معلق */
+        .flow-line { position: absolute; width: 2px; background: linear-gradient(to bottom, #5865f2, transparent); left: 50%; transform: translateX(-50%); }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #101A40; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #2b2d31; border-radius: 10px; }
     </style>
 </head>
-<body class="text-gray-100 min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between">
 
     <div class="bg-animation"></div>
 
-    <header id="mainHeader" class="border-b border-gray-800/60 bg-brandDark/40 backdrop-blur-md sticky top-0 z-40 px-4 py-3.5 hidden">
+    <header id="mainHeader" class="border-b border-[#2b2d31] bg-[#111214]/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 hidden">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('welcomePage')">
-                <span class="text-lg">🏁</span>
-                <h1 class="text-base font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-brandBlue to-blue-300">IRAN SLIDE ZONE</h1>
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('welcomePage')">
+                <span class="text-base">🏁</span>
+                <h1 class="text-sm font-black tracking-wider text-white">IRAN SLIDE ZONE</h1>
             </div>
             <div class="relative w-full sm:w-80">
-                <input type="text" id="searchBar" placeholder="جستجو در مودها..." class="w-full bg-brandDark/80 border border-gray-700/50 rounded-xl px-4 py-2 pr-10 text-xs focus:outline-none focus:border-brandBlue transition-all">
-                <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
+                <input type="text" id="searchBar" placeholder="جستجو در مودها..." class="w-full bg-[#1e2024] border border-[#2b2d31] rounded-xl px-4 py-1.5 pr-10 text-xs text-white focus:outline-none focus:border-cmAccent transition-all">
+                <i class="fas fa-search absolute left-3 top-2.5 text-gray-500 text-xs"></i>
             </div>
         </div>
     </header>
 
     <section id="welcomePage" class="flex-1 flex flex-col items-center justify-center text-center px-4 py-12">
-        <div class="max-w-2xl bg-brandDark/30 border border-gray-800/60 p-8 rounded-3xl backdrop-blur-md shadow-2xl">
-            <span class="text-5xl inline-block mb-4 animate-bounce">🏎️</span>
-            <h2 class="text-2xl font-black text-brandBlue mb-3">به ایران اسلاید زون خوش آمدید</h2>
-            <p class="text-gray-400 text-xs leading-relaxed mb-8">مرجع بزرگ دانلود مودهای بازی Assetto Corsa. انواع ماشین‌های ایرانی و خارجی، پیست‌های دریفت، جاده‌های کشور و افزونه‌های گرافیکی.</p>
-            <button onclick="showPage('categoriesPage')" class="bg-brandBlue hover:bg-blue-600 text-brandDark font-extrabold px-8 py-3.5 rounded-2xl shadow-lg shadow-brandBlue/10 transition-all text-xs">
+        <div class="max-w-xl bg-[#1e2024] border border-[#2b2d31] p-8 rounded-2xl shadow-2xl">
+            <span class="text-4xl inline-block mb-3">🏎️</span>
+            <h2 class="text-xl font-black text-white mb-2">ایران اسلاید زون</h2>
+            <p class="text-gray-400 text-xs leading-relaxed mb-6">مرجع تخصصی و بهینه مودهای بازی Assetto Corsa زنده متصل به پایگاه داده ابری.</p>
+            <button onclick="showPage('categoriesPage')" class="bg-cmAccent hover:bg-[#4752c4] text-white font-bold px-8 py-3 rounded-xl shadow-lg transition-all text-xs">
                 ورود به بخش دانلود مود <i class="fas fa-arrow-left mr-2"></i>
             </button>
         </div>
     </section>
 
     <section id="categoriesPage" class="max-w-5xl w-full mx-auto px-4 py-12 hidden">
-        <h2 class="text-lg font-bold text-center mb-1">انتخاب دسته‌بندی مود</h2>
-        <p class="text-center text-[11px] text-gray-500 mb-8">بخش مورد نظر خود را انتخاب کنید</p>
+        <h2 class="text-base font-bold text-center mb-1 text-white">انتخاب دسته‌بندی مود</h2>
+        <p class="text-center text-[11px] text-gray-500 mb-8">وارد بخش مورد نظر خود شوید</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="categoriesMenuGrid"></div>
         <div class="text-center mt-8">
-            <button onclick="showPage('welcomePage')" class="text-xs text-gray-500 hover:text-brandBlue transition-all"><i class="fas fa-arrow-right ml-1"></i> بازگشت به خانه</button>
+            <button onclick="showPage('welcomePage')" class="text-xs text-gray-500 hover:text-white transition-all"><i class="fas fa-arrow-right ml-1"></i> بازگشت به خانه</button>
         </div>
     </section>
 
-    <section id="galleryPage" class="max-w-[1600px] w-full mx-auto px-4 py-6 hidden flex-1 flex flex-col md:flex-row gap-6">
+    <section id="galleryPage" class="max-w-[1500px] w-full mx-auto px-4 py-6 hidden flex-1 flex flex-col md:flex-row gap-6">
         
-        <aside class="w-full md:w-64 bg-brandDark/30 border border-gray-800/80 rounded-2xl p-4 h-[auto] md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col gap-2">
-            <h3 class="text-xs font-bold text-brandBlue mb-2 pb-2 border-b border-gray-800/50 flex items-center gap-2">
-                <i class="fas fa-folder-open"></i> ناوبری مودها (Explorer)
+        <aside class="w-full md:w-64 bg-[#1e2024] border border-[#2b2d31] rounded-2xl p-4 h-auto md:h-[calc(100vh-140px)] sticky top-20 overflow-y-auto custom-scroll flex flex-col gap-2">
+            <h3 class="text-[11px] font-bold text-gray-400 mb-1 pb-2 border-b border-[#2b2d31] flex items-center gap-2 uppercase tracking-wider">
+                <i class="fas fa-folder-open text-cmAccent"></i> File Explorer
             </h3>
-            <div id="explorerTree" class="flex flex-col gap-1">
+            <div id="explorerTree" class="flex flex-col gap-0.5">
                 </div>
         </aside>
 
@@ -110,34 +116,34 @@
         </main>
     </section>
 
-    <div id="infoModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" onclick="closeInfoModal()">
-        <div class="bg-[#0e1635] border border-gray-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl scale-95 transition-all duration-300" id="infoModalContainer" onclick="event.stopPropagation()">
-            <div class="p-4 border-b border-gray-800/60 flex justify-between items-center bg-brandBg/40">
-                <h3 id="infoModalTitle" class="font-bold text-sm text-brandBlue">مشخصات و توضیحات مود</h3>
+    <div id="infoModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="closeInfoModal()">
+        <div class="bg-[#1e2024] border border-[#2b2d31] rounded-2xl max-w-md w-full overflow-hidden shadow-2xl scale-95 transition-all duration-200" id="infoModalContainer" onclick="event.stopPropagation()">
+            <div class="p-4 border-b border-[#2b2d31] flex justify-between items-center bg-[#111214]">
+                <h3 id="infoModalTitle" class="font-bold text-xs text-white">مشخصات مود</h3>
                 <button onclick="closeInfoModal()" class="text-gray-400 hover:text-white text-base"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-4 text-xs">
                 <div>
-                    <h4 class="text-gray-400 font-bold mb-1">📝 توضیحات ادمین:</h4>
-                    <p id="infoModalDesc" class="text-gray-300 leading-relaxed text-justify bg-brandBg/50 p-3 rounded-xl border border-gray-800/40"></p>
+                    <h4 class="text-gray-400 font-bold mb-1">توضیحات ادمین:</h4>
+                    <p id="infoModalDesc" class="text-gray-300 leading-relaxed text-justify bg-[#111214] p-3 rounded-xl border border-[#2b2d31]"></p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-gray-400 font-bold">🏷️ تگ‌ها:</span>
+                    <span class="text-gray-400 font-bold">تگ‌ها:</span>
                     <div id="infoModalTags" class="flex flex-wrap gap-1"></div>
                 </div>
-                <div class="flex items-center justify-between border-t border-gray-800/60 pt-3 text-[11px]">
+                <div class="flex items-center justify-between border-t border-[#2b2d31] pt-3 text-[11px]">
                     <div class="flex items-center gap-2">
-                        <img id="infoModalAvatar" class="w-5 h-5 rounded-full bg-brandBg" src="">
-                        <span>ارسال کننده: <strong id="infoModalAuthor" class="text-gray-300"></strong></span>
+                        <img id="infoModalAvatar" class="w-5 h-5 rounded-full bg-[#111214]" src="">
+                        <span>ارسال: <strong id="infoModalAuthor" class="text-white"></strong></span>
                     </div>
-                    <span id="infoModalCategory" class="text-brandBlue font-bold bg-brandBlue/10 px-2 py-0.5 rounded-lg uppercase"></span>
+                    <span id="infoModalCategory" class="text-cmAccent font-bold bg-cmAccent/10 px-2 py-0.5 rounded-lg uppercase"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="border-t border-gray-900/50 bg-brandBg py-4 text-center text-[11px] text-gray-600 mt-12">
-        Iran Slide Zone © 2026 - Powered by GitHub Pages
+    <footer class="border-t border-[#1e2024] bg-[#111214] py-3 text-center text-[10px] text-gray-600">
+        Iran Slide Zone © 2026 - Live Content Manager Feed
     </footer>
 
     <script src="app.js"></script>
