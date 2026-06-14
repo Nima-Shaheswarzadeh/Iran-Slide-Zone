@@ -3,30 +3,32 @@
     "id": "bmw-m3-e46-drift",
     "title": "BMW M3 E46 Drift Spec",
     "category": "cars",
+    "brand": "BMW",
     "image": "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=600&auto=format&fit=crop",
     "size": "145 MB",
     "version": "1.0",
     "tags": ["drift", "bmw", "iran"],
-    "download": "https://example.com/download-bmw"
+    "download": "https://example.com/download-bmw",
+    "description": "این مود شامل فیزیک شبیه‌سازی شده واقعی برای دریفت، صداگذاری اختصاصی اگزوز و چندین اسکین مختلف بدنه است.",
+    "author": {
+      "name": "Arshia",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Arshia"
+    }
   },
   {
-    "id": "tehran-street-map",
-    "title": "Tehran Highways Map",
-    "category": "maps",
+    "id": "ikco-samand-shoti",
+    "title": "Samand LX Shoti Spec",
+    "category": "cars",
+    "brand": "IKCO",
     "image": "https://images.unsplash.com/photo-1542362567-b07e54358753?q=80&w=600&auto=format&fit=crop",
-    "size": "850 MB",
-    "version": "2.4",
-    "tags": ["map", "tehran", "highway"],
-    "download": "https://example.com/download-tehran"
-  },
-  {
-    "id": "pure-graphics-csp",
-    "title": "Pure Graphics Patch 2026",
-    "category": "graphics",
-    "image": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=600&auto=format&fit=crop",
-    "size": "2.1 GB",
-    "version": "0.99",
-    "tags": ["csp", "graphics", "photo"],
-    "download": "https://example.com/download-pure"
+    "size": "65 MB",
+    "version": "2.1",
+    "tags": ["shoti", "samand", "iranian"],
+    "download": "https://example.com/download-samand",
+    "description": "مود سمند ال‌ایکس شوتی با ارتفاع عقب بالا، فیزیک تعادل مناسب برای جاده‌های ایران و شیشه‌های دودی.",
+    "author": {
+      "name": "Admin_Sina",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Sina"
+    }
   }
 ]
