@@ -8,10 +8,8 @@
 
 body { 
     font-family: 'YekanBakh', 'Segoe UI', sans-serif; 
-    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* افکت موج رنگی نئون بورد */
 @keyframes neonFlow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -25,7 +23,6 @@ body {
     animation: neonFlow 5s linear infinite;
 }
 
-/* رشته اتصال معلق نام مود */
 .hanging-string {
     position: absolute;
     bottom: -16px;
@@ -37,7 +34,6 @@ body {
     z-index: 10;
 }
 
-/* لایه‌های ۳ تایی گالری تصاویر */
 .card-perspective {
     position: relative;
     width: 100%;
@@ -53,40 +49,34 @@ body {
     animation: neonFlow 8s linear infinite;
 }
 
+/* 🎯 بهینه‌سازی سرعت انیمیشن فلیپ تصویر به 0.75s برای بر خوردن نرم‌تر و نمایش جزئیات سه‌بعدی */
 .img-layer {
     position: absolute; inset: 2px; 
     border-radius: 1.4rem; overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
     background: #1f2937;
-    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+    transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
     will-change: transform, opacity;
 }
 
 .slanted-swap-out {
-    transform: translate(115%, -15%) rotate(12deg) scale(0.9) !important;
+    transform: translate(120%, -20%) rotate(16deg) scale(0.85) !important;
     opacity: 0 !important;
 }
 
-/* انیمیشن لود نرم کارت‌ها */
 .stagger-card {
     opacity: 0; transform: translateY(12px);
     animation: cardEntrance 0.35s ease-out forwards;
 }
 @keyframes cardEntrance { to { opacity: 1; transform: translateY(0); } }
 
-/* دکمه دانلود با انیمیشن RGB ثابت برای هردو حالت روز و شب */
+/* دکمه دانلود با انیمیشن دائمی و شیک سایبرپانکی متحرک */
 .btn-download-rgb {
     background: linear-gradient(90deg, #1e1b4b, #2e1065, #031e1a, #1a0c2e, #1e1b4b);
     background-size: 300% 300%;
     animation: neonFlow 6s ease infinite;
     border: 1px solid rgba(255, 255, 255, 0.15);
     transition: all 0.2s ease;
-}
-.light .btn-download-rgb {
-    background: linear-gradient(90deg, #4f46e5, #6366f1, #3b82f6, #4f46e5);
-    background-size: 300% 300%;
-    animation: neonFlow 5s ease infinite;
-    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 .btn-download-rgb:hover {
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
@@ -102,7 +92,7 @@ body {
 .custom-scroll::-webkit-scrollbar { width: 3px; }
 .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-/* سیستم اسکلتون لودینگ (Skeleton Shimmer) */
+/* سیستم شبیه‌ساز لودینگ اسکلتون */
 @keyframes skeletonShimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
@@ -111,8 +101,4 @@ body {
     background: linear-gradient(90deg, #22272e 25%, #2d333b 50%, #22272e 75%);
     background-size: 200% 100%;
     animation: skeletonShimmer 1.5s infinite linear;
-}
-.light .skeleton-block {
-    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-    background-size: 200% 100%;
 }
