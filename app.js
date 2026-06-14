@@ -17,10 +17,10 @@ const locales = {
         audioOff: "صدا: خاموش",
         searchPlaceholder: "جستجو پیشرفته در دیتابیس...",
         latestLabel: "جدیدترین‌ها (۹ پست آخر)",
-        adminLeaderboard: "جدول ادمین‌های فعال", // آیکون کیبوردی طبق دستور شما حذف شد
+        adminLeaderboard: "جدول ادمین‌های فعال",
         copyright: "تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.",
         noItem: "هیچ موردی پیدا نشد.",
-        downloadMod: "دانلود مود", // اصلاح طبق دستور شما
+        downloadMod: "دانلود مود",
         specifications: "SPECIFICATIONS",
         modalDesc: "توضیحات و بررسی فنی:",
         modalTags: "تگ‌های متادیتا:",
@@ -48,6 +48,20 @@ const locales = {
         exitHub: "Exit Mod Hub"
     }
 };
+
+// لیست ۷ دسته‌بندی اصلی و دقیق با معادل فارسی طبق فیلد درخواستی
+const mainCategories = [
+    { id: 'car', labelEn: 'Car', labelFa: 'ماشین', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
+    { id: 'map', labelEn: 'Map', labelFa: 'مپ', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
+    { id: 'app', labelEn: 'App', labelFa: 'برنامه', icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' },
+    { id: 'csp', labelEn: 'CSP', labelFa: 'سی اس پی', icon: '🛠️', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' },
+    { id: 'driver', labelEn: 'Driver', labelFa: 'راننده', icon: '👤', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=400' },
+    { id: 'server', labelEn: 'Server', labelFa: 'سرور', icon: '🖥️', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=400' },
+    { id: 'graphic', labelEn: 'Graphic', labelFa: 'گرافیک', icon: '🌠', img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400' }
+];
+
+const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA"; 
+const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
 function playSound(type) {
     if (isMuted) return;
@@ -112,6 +126,7 @@ function updateDOMTranslations() {
     document.getElementById('modalDevTitle').innerText = t.modalDev;
     document.getElementById('exitHubBtn').innerHTML = currentLang==='fa' ? '<i class="fas fa-arrow-right ml-1"></i> خروج از هاب' : 'Exit Mod Hub <i class="fas fa-arrow-left ml-1"></i>';
 
+    renderCategoriesMenu();
     renderExplorerTree();
     filterAndRender();
 }
@@ -123,16 +138,6 @@ function toggleMute() {
     document.querySelector('#audioToggleBtn i').className = isMuted ? 'fas fa-volume-mute ml-1' : 'fas fa-volume-up ml-1';
 }
 
-const mainCategories = [
-    { id: 'cars', label: 'Cars Library', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
-    { id: 'maps', label: 'Maps Library', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
-    { id: 'graphics', label: 'Graphics Library', icon: '🌠', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' },
-    { id: 'apps', label: 'Apps / HUD', icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' }
-];
-
-const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA"; 
-const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
-
 async function init() {
     document.getElementById('htmlTag').classList.add('dark'); 
     await fetchModsFromSheets();
@@ -141,7 +146,7 @@ async function init() {
     handleRouting(); 
 }
 
-// نگاشت (Mapping) فیلدهای جدید گوگل شیت بر اساس چیدمان پیوست شده شما
+// اصلاح و فیکس دقیق مرتب‌سازی ستون‌های گوگل شیت بر اساس چیدمان تصویر شما
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -161,10 +166,10 @@ async function fetchModsFromSheets() {
                 image2: cells[6] ? String(cells[6].v) : '',
                 image3: cells[7] ? String(cells[7].v) : '',
                 size: cells[8] ? String(cells[8].v) : '',
-                developer: cells[9] ? String(cells[9].v) : 'Unknown', // ستون سازنده جایگزین ورژن شد
+                developer: cells[9] ? String(cells[9].v) : 'Unknown', // ستون سازنده مود
                 download: cells[10] ? String(cells[10].v) : '#',
-                password: cells[11] ? String(cells[11].v) : '', // ستون پسورد اختصاصی
-                description: cells[12] ? String(cells[12].v) : '',
+                password: cells[11] ? String(cells[11].v) : '', // ستون رمز عبور واقعی
+                description: cells[12] ? String(cells[12].v) : '', // ستون توضیحات واقعی
                 adminName: cells[13] ? String(cells[13].v) : 'Admin', // ادمین پست‌گذار
                 tags: cells[14] ? String(cells[14].v).split(',').map(t => t.trim()) : ['mod']
             };
@@ -176,12 +181,13 @@ function renderCategoriesMenu() {
     const grid = document.getElementById('categoriesMenuGrid');
     grid.innerHTML = '';
     mainCategories.forEach(cat => {
+        const label = currentLang === 'fa' ? cat.labelFa : cat.labelEn;
         grid.innerHTML += `
-            <div onclick="navigateTo('gallery', '${cat.id}')" class="sidebar-folder relative h-40 rounded-2xl overflow-hidden cursor-pointer group dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 hover:scale-[1.02]">
+            <div onclick="navigateTo('gallery', '${cat.id}')" class="sidebar-folder relative h-36 rounded-2xl overflow-hidden cursor-pointer group dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 hover:scale-[1.02]">
                 <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-10 dark:opacity-5 group-hover:opacity-25 transition-all duration-500 blur-[0.2px]">
-                <div class="absolute inset-0 bg-gradient-to-t dark:from-zoneBg from-white via-transparent to-transparent flex flex-col justify-end p-5">
-                    <span class="text-2xl mb-1">${cat.icon}</span>
-                    <h3 class="font-black text-xs tracking-wide">${cat.label}</h3>
+                <div class="absolute inset-0 bg-gradient-to-t dark:from-zoneBg from-white via-transparent to-transparent flex flex-col justify-end p-4">
+                    <span class="text-xl mb-1">${cat.icon}</span>
+                    <h3 class="font-black text-xs tracking-wide">${label}</h3>
                 </div>
             </div>
         `;
@@ -207,11 +213,12 @@ function renderExplorerTree() {
         const isCurrentCat = (currentCategory === cat.id);
         const isOpen = (openCategoryTree === cat.id);
         const catClass = (isCurrentCat && currentSubFilter === 'all') ? 'bg-black/5 dark:bg-white/5 text-zoneGlow font-black border-r-2 border-zoneAccent' : 'text-gray-400 hover:bg-black/5 dark:hover:bg-white/5';
-        
+        const label = currentLang === 'fa' ? cat.labelFa : cat.labelEn;
+
         let subItemsHtml = '';
         let subs = [];
-        if (cat.id === 'cars') subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
-        if (cat.id === 'maps') subs = [...new Set(allMods.filter(m => m.category === 'maps').map(m => m.subcategory))].filter(Boolean);
+        if (cat.id === 'car') subs = [...new Set(allMods.filter(m => m.category === 'car').map(m => m.brand))].filter(Boolean);
+        if (cat.id === 'map') subs = [...new Set(allMods.filter(m => m.category === 'map').map(m => m.subcategory))].filter(Boolean);
 
         if (subs.length > 0) {
             subItemsHtml = `<div class="submenu-transition ${isOpen ? 'submenu-open' : ''} flex flex-col pr-4 my-1 border-r dark:border-white/5 border-black/5 mr-2 gap-1">`;
@@ -236,7 +243,7 @@ function renderExplorerTree() {
             <div class="flex flex-col">
                 <div onclick="toggleTreeFolder('${cat.id}')" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all ${catClass}">
                     <div class="flex items-center gap-2.5">
-                        <span class="text-xs opacity-80">${cat.icon}</span> <span>${cat.label}</span>
+                        <span class="text-xs opacity-80">${cat.icon}</span> <span>${label}</span>
                     </div>
                     <i class="fas ${isOpen ? 'fa-angle-down' : 'fa-angle-left'} text-[9px] opacity-40"></i>
                 </div>
@@ -334,7 +341,6 @@ function renderCards(mods) {
                 <div class="flex justify-between items-center dark:bg-[#11121c]/80 bg-white px-3 py-2 rounded-xl text-[10px] text-gray-400 dark:border-white/5 border-black/5 shadow-sm">
                     <div class="flex items-center gap-3 font-medium">
                         <span><i class="fas fa-hdd text-zoneGlow ml-1"></i>${mod.size}</span>
-                        <span><i class="fas fa-user-gear text-zoneGlow ml-1"></i>${mod.developer}</span>
                         <span class="text-indigo-400 font-bold"><i class="fas fa-user-shield ml-1"></i>${mod.adminName}</span>
                     </div>
                     <span class="font-black text-zoneGlow uppercase text-[9px] bg-zoneAccent/10 px-2 py-0.5 rounded-md border border-zoneAccent/20">${mod.brand || mod.category}</span>
@@ -365,9 +371,9 @@ function renderCards(mods) {
 
 function copyPassword(pass) {
     playSound('click');
-    if(!pass) return;
+    if(!pass || pass === "undefined") return;
     navigator.clipboard.writeText(pass).then(() => {
-        // بدون پاپ آپ، کپی کاملاً در پس‌زمینه با هندل صوتی انجام می‌شود
+        // عملیات کاملاً بی صدا و پس‌زمینه بدون پاپ آپ مزاحم
     }).catch(err => console.log(err));
 }
 
@@ -432,16 +438,13 @@ function openInfoModal(event, index) {
     playSound('click');
     event.stopPropagation(); 
     
-    const cardContainer = event.currentTarget.closest('.stagger-card');
-    const cardTitle = cardContainer.querySelector('h3') ? cardContainer.querySelector('h3').innerText.trim() : '';
-    
-    // پیدا کردن آیتم از آرایه
+    // دریافت دقیق آبجکت جاری بر اساس ایندکس فیلتر شده کارت
     const mod = allMods[index];
     if(!mod) return;
 
     document.getElementById('infoModalTitle').innerText = mod.title.toUpperCase();
     document.getElementById('infoModalDesc').innerText = mod.description || "...";
-    document.getElementById('infoModalDeveloper').innerText = mod.developer; // انتقال نام سازنده به مودال
+    document.getElementById('infoModalDeveloper').innerText = mod.developer; // سازنده اصلی مود فقط در اینجا نمایش داده می‌شود
     document.getElementById('infoModalCategory').innerText = mod.category;
     
     const tagsBox = document.getElementById('infoModalTags'); tagsBox.innerHTML = '';
