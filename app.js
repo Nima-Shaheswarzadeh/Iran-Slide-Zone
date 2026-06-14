@@ -1,60 +1,38 @@
-let allMods = [];
-let currentCategory = 'latest';
-let currentSubFilter = 'all';
-let openCategoryTree = null;   
+// app.js
 
+// ---------- STATE ----------
+let allMods = [];
+let currentCategory = null;      // e.g., 'cars', never 'all'
+let currentSubFilter = 'all';
+let openCategoryTree = null;     // currently open category in sidebar for sub-menus
+
+// ---------- GOOGLE SHEETS ----------
 const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA"; 
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
+// Main categories metadata
 const mainCategories = [
-    { id: 'cars', label: 'Cars', icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
-    { id: 'maps', label: 'Maps', icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
-    { id: 'csp', label: 'CSP', icon: '👨‍💻', img: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=400' },
-    { id: 'graphics', label: 'Graphics', icon: '🌠', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' },
-    { id: 'servers', label: 'Servers', icon: '🌐', img: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400' },
-    { id: 'apps', label: 'Apps', icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' },
-    { id: 'drivers', label: 'Drivers', icon: '👥', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=400' }
+    { id: 'cars',    label: 'Cars',     icon: '🚗', img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400' },
+    { id: 'maps',    label: 'Maps',     icon: '🗺️', img: 'https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400' },
+    { id: 'csp',     label: 'CSP',      icon: '👨‍💻', img: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=400' },
+    { id: 'graphics',label: 'Graphics', icon: '🌠', img: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400' },
+    { id: 'servers', label: 'Servers',  icon: '🌐', img: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400' },
+    { id: 'apps',    label: 'Apps',     icon: '📲', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400' },
+    { id: 'drivers', label: 'Drivers',  icon: '👥', img: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=400' }
 ];
 
+// Which categories have subdirectories (brands / countries)
+const categoriesWithSubs = ['cars', 'maps'];
+
+// ---------- INITIALIZATION ----------
 async function init() {
     await fetchModsFromSheets();
-    renderCategoriesMenu();
-    
-    // گوش به زنگ بودن تغییرات هش URL برای جلوگیری از پریدن صفحه موقع رفرش
-    window.addEventListener('hashchange', handleRouting);
-    handleRouting(); 
+    // Apply URL hash on load
+    applyHash();
+    window.addEventListener('hashchange', onHashChange);
 }
 
-// سیستم مسیردهی بر پایه هش (SPA Hash Router) کاملا پیشرفته
-function handleRouting() {
-    const hash = window.location.hash || '#home';
-    
-    if (hash === '#home') {
-        showPage('welcomePage');
-    } else if (hash === '#categories') {
-        showPage('categoriesPage');
-    } else if (hash.startsWith('#gallery')) {
-        // ساختار هش: #gallery/cars/IKCO
-        const parts = hash.split('/');
-        currentCategory = parts[1] || 'latest';
-        currentSubFilter = parts[2] || 'all';
-        if(currentCategory !== 'latest') openCategoryTree = currentCategory;
-        
-        showPage('galleryPage');
-        renderExplorerTree();
-        filterAndRender();
-    }
-}
-
-function navigateTo(state, cat = '', sub = '') {
-    if (state === 'home') window.location.hash = '#home';
-    else if (state === 'categories') window.location.hash = '#categories';
-    else if (state === 'gallery') {
-        if (cat === 'latest') window.location.hash = '#gallery/latest';
-        else if (cat) window.location.hash = `#gallery/${cat}/${sub || 'all'}`;
-    }
-}
-
+// ---------- DATA FETCHING ----------
 async function fetchModsFromSheets() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -82,205 +60,320 @@ async function fetchModsFromSheets() {
                 },
                 tags: cells[12] ? String(cells[12].v).split(',').map(t => t.trim()) : ['mod']
             };
-        }).filter(item => item.id && item.title).reverse(); 
+        }).filter(item => item.id && item.title);
     } catch (e) {
-        console.error("خطا در ارتباط با شیت:", e);
+        console.error("خطا در لود زنده داده‌ها از گوگل شیت:", e);
+        allMods = [];
     }
 }
 
-function renderCategoriesMenu() {
-    const grid = document.getElementById('categoriesMenuGrid');
-    grid.innerHTML = '';
-    mainCategories.forEach(cat => {
-        grid.innerHTML += `
-            <div onclick="navigateTo('gallery', '${cat.id}')" class="relative h-28 rounded-xl overflow-hidden cursor-pointer group border border-[#1e2030] bg-[#12131c]">
-                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:scale-105 group-hover:opacity-5 transition-all duration-300 blur-[1px]">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0b0c10] to-transparent flex flex-col justify-end p-4">
-                    <span class="text-base mb-1">${cat.icon}</span>
-                    <h3 class="font-bold text-xs text-white">${cat.label}</h3>
-                </div>
-            </div>
-        `;
-    });
-}
+// ---------- HASH BASED ROUTING ----------
+let ignoreNextHashChange = false;
 
-// رندر سایدبار منیجر همراه با شمارشگر و افکت آکاردئونی بسیار روان
-function renderExplorerTree() {
-    const treeContainer = document.getElementById('explorerTree');
-    treeContainer.innerHTML = '';
-
-    const latestActive = (currentCategory === 'latest') ? 'bg-cmAccent text-white font-bold' : 'text-gray-400 hover:bg-[#1e2030]/50';
-    treeContainer.innerHTML += `
-        <div onclick="navigateTo('gallery', 'latest')" class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-all ${latestActive}">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-history text-[11px]"></i> <span>جدیدترین مودها (۹ اخیر)</span>
-            </div>
-            <span class="text-[9px] bg-[#0b0c10]/60 px-1.5 py-0.5 rounded text-gray-400">${Math.min(allMods.length, 9)}</span>
-        </div>
-    `;
-
-    mainCategories.forEach(cat => {
-        const isCurrentCat = (currentCategory === cat.id);
-        const isOpen = (openCategoryTree === cat.id);
-        const catClass = (isCurrentCat && currentSubFilter === 'all') ? 'bg-[#1e2030] text-cmAccent font-bold' : 'text-gray-400 hover:bg-[#1e2030]/40';
-        
-        let subItemsHtml = '';
-        let subs = [];
-        if (cat.id === 'cars') subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
-        if (cat.id === 'maps') subs = [...new Set(allMods.filter(m => m.category === 'maps').map(m => m.subcategory))].filter(Boolean);
-
-        if (subs.length > 0) {
-            subItemsHtml = `<div id="sub-folder-${cat.id}" class="submenu-transition ${isOpen ? 'submenu-open' : ''} flex flex-col pr-4 my-0.5 border-r border-[#1e2030] mr-2 gap-0.5">`;
-            subs.forEach(sub => {
-                const isSubActive = (currentCategory === cat.id && currentSubFilter === sub);
-                const subClass = isSubActive ? 'text-cmAccent font-bold bg-cmAccent/5' : 'text-gray-500 hover:text-gray-300';
-                const count = allMods.filter(m => m.category === cat.id && (m.brand === sub || m.subcategory === sub)).length;
-
-                subItemsHtml += `
-                    <div onclick="navigateTo('gallery', '${cat.id}', '${sub}')" class="px-2 py-1.5 rounded-md text-[11px] cursor-pointer transition-all flex items-center justify-between ${subClass}">
-                        <div class="flex items-center gap-1.5">
-                            <i class="fas fa-folder text-[10px] opacity-60"></i> <span>${sub}</span>
-                        </div>
-                        <span class="text-[8px] font-mono opacity-40">${count}</span>
-                    </div>
-                `;
-            });
-            subItemsHtml += `</div>`;
-        }
-
-        treeContainer.innerHTML += `
-            <div class="flex flex-col mt-0.5">
-                <div onclick="toggleTreeFolder('${cat.id}')" class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-all ${catClass}">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs">${cat.icon}</span> <span>${cat.label}</span>
-                    </div>
-                    <i class="fas ${isOpen ? 'fa-chevron-down' : 'fa-chevron-left'} text-[8px] opacity-40"></i>
-                </div>
-                ${subItemsHtml}
-            </div>
-        `;
-    });
-}
-
-// مدیریت باز و بسته شدن پوشه با قابلیت انیمیشن آکاردئونی و لغو فیلتر ریز
-function toggleTreeFolder(catId) {
-    if (openCategoryTree === catId) {
-        openCategoryTree = null;
-        navigateTo('gallery', catId, 'all');
-    } else {
-        openCategoryTree = catId;
-        navigateTo('gallery', catId, 'all');
+function navigateTo(page, category = null, sub = null) {
+    let hash = '';
+    if (page === 'home') hash = '#home';
+    else if (page === 'categories') hash = '#categories';
+    else if (page === 'gallery' && category) {
+        hash = '#gallery/' + category;
+        if (sub) hash += '/' + sub;
     }
+    // Prevent duplicate hash change causing extra render
+    if (window.location.hash === hash) {
+        // still apply state to ensure UI matches
+        applyHashState();
+        return;
+    }
+    ignoreNextHashChange = true;
+    window.location.hash = hash;
+    applyHashState();  // manual apply before hashchange fires
 }
 
-function showPage(pageId) {
+function onHashChange() {
+    if (ignoreNextHashChange) {
+        ignoreNextHashChange = false;
+        return;
+    }
+    applyHashState();
+}
+
+function applyHash() {
+    applyHashState();
+}
+
+function parseHash() {
+    const hash = window.location.hash.slice(1); // remove '#'
+    const parts = hash.split('/');
+    let page = 'home';
+    let category = null;
+    let sub = null;
+
+    if (parts[0] === 'categories') page = 'categories';
+    else if (parts[0] === 'gallery' && parts[1]) {
+        page = 'gallery';
+        category = parts[1];
+        if (parts[2]) sub = parts[2];
+    }
+    // else default 'home'
+    return { page, category, sub };
+}
+
+function applyHashState() {
+    const { page, category, sub } = parseHash();
+
+    // Reset filter state
+    currentCategory = category;
+    currentSubFilter = sub || 'all';
+    openCategoryTree = null; // will be set by rendering later if needed
+
+    // Show correct page
     document.getElementById('welcomePage').classList.add('hidden');
     document.getElementById('categoriesPage').classList.add('hidden');
     document.getElementById('galleryPage').classList.add('hidden');
     document.getElementById('mainHeader').classList.add('hidden');
 
-    document.getElementById(pageId).classList.remove('hidden');
-    if (pageId === 'galleryPage') document.getElementById('mainHeader').classList.remove('hidden');
+    if (page === 'home') {
+        document.getElementById('welcomePage').classList.remove('hidden');
+    } else if (page === 'categories') {
+        document.getElementById('categoriesPage').classList.remove('hidden');
+        renderCategoriesMenu();
+    } else if (page === 'gallery' && category) {
+        document.getElementById('galleryPage').classList.remove('hidden');
+        document.getElementById('mainHeader').classList.remove('hidden');
+        // If we have a category, maybe auto-open its tree
+        if (categoriesWithSubs.includes(category)) {
+            openCategoryTree = category;
+        }
+        renderExplorerTree();
+        filterAndRender();
+    }
 }
 
-// رندر کارت‌ها بر اساس استاندارد کاملا جدید فیکس شده (تمام مشخصات فنی روی کارت)
+// ---------- CATEGORIES GRID (landing -> selection) ----------
+function renderCategoriesMenu() {
+    const grid = document.getElementById('categoriesMenuGrid');
+    grid.innerHTML = '';
+    mainCategories.forEach(cat => {
+        grid.innerHTML += `
+            <div onclick="navigateTo('gallery', '${cat.id}')" class="relative h-32 rounded-2xl overflow-hidden cursor-pointer group border border-white/5 shadow-lg hover:shadow-accent/20 transition-all duration-300 hover:-translate-y-1">
+                <img src="${cat.img}" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:scale-105 group-hover:opacity-10 transition-all duration-700 blur-[1px]">
+                <div class="absolute inset-0 bg-gradient-to-t from-primary-light via-primary-light/40 to-transparent flex flex-col justify-end p-4">
+                    <span class="text-lg mb-1 drop-shadow">${cat.icon}</span>
+                    <h3 class="font-bold text-xs text-accent">${cat.label}</h3>
+                </div>
+            </div>
+        `;
+    });
+}
+
+// ---------- SIDEBAR EXPLORER (ACCORDION) ----------
+function renderExplorerTree() {
+    const treeContainer = document.getElementById('explorerTree');
+    treeContainer.innerHTML = '';
+
+    mainCategories.forEach(cat => {
+        const hasSubs = categoriesWithSubs.includes(cat.id);
+        const isOpen = (openCategoryTree === cat.id);
+        const isActive = (currentCategory === cat.id);
+        const catClass = isActive ? 'bg-accent/10 text-accent font-bold border-r-2 border-accent' : 'text-gray-400 hover:bg-white/5';
+
+        let subItemsHtml = '';
+        if (hasSubs && isOpen) {
+            let subs = [];
+            if (cat.id === 'cars') {
+                subs = [...new Set(allMods.filter(m => m.category === 'cars').map(m => m.brand))].filter(Boolean);
+            } else if (cat.id === 'maps') {
+                subs = [...new Set(allMods.filter(m => m.category === 'maps').map(m => m.subcategory))].filter(Boolean);
+            }
+            subItemsHtml = `<div class="sub-tree pr-4 ml-2 border-r border-white/5" id="sub-${cat.id}">`;
+            subs.forEach(sub => {
+                const subActive = (currentSubFilter === sub);
+                const subClass = subActive ? 'text-accent font-bold bg-accent/10' : 'text-gray-500 hover:text-gray-200';
+                subItemsHtml += `
+                    <div onclick="selectSubFilter(event, '${cat.id}', '${sub}')" class="px-2 py-1.5 rounded-lg text-[11px] cursor-pointer transition-all flex items-center gap-1.5 ${subClass}">
+                        <i class="fas fa-angle-left text-[9px]"></i> <span>${sub}</span>
+                    </div>`;
+            });
+            subItemsHtml += `</div>`;
+        }
+
+        treeContainer.innerHTML += `
+            <div>
+                <div onclick="${hasSubs ? `toggleTreeCategory('${cat.id}')` : `navigateTo('gallery', '${cat.id}')`}"
+                     class="flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${catClass}">
+                    <div class="flex items-center gap-2">
+                        <span>${cat.icon}</span> <span>${cat.label}</span>
+                    </div>
+                    ${hasSubs ? `<i class="fas ${isOpen ? 'fa-chevron-down' : 'fa-chevron-left'} text-[10px] opacity-50"></i>` : ''}
+                </div>
+                ${subItemsHtml}
+            </div>`;
+    });
+
+    // Trigger max-height animation for open sub-trees after DOM is ready
+    requestAnimationFrame(() => {
+        document.querySelectorAll('.sub-tree').forEach(sub => {
+            const isOpen = sub.parentElement.querySelector('[class*="fa-chevron-down"]') !== null;
+            if (isOpen) {
+                sub.style.maxHeight = sub.scrollHeight + 'px';
+            } else {
+                sub.style.maxHeight = '0px';
+            }
+        });
+    });
+}
+
+// Toggle a category in sidebar (only for categories with subs)
+function toggleTreeCategory(catId) {
+    if (openCategoryTree === catId) {
+        // Close sub-menu and show all items of this category
+        openCategoryTree = null;
+        currentCategory = catId;
+        currentSubFilter = 'all';
+    } else {
+        // Open this category's sub-menu
+        openCategoryTree = catId;
+        currentCategory = catId;
+        currentSubFilter = 'all';
+    }
+    // Update hash
+    navigateTo('gallery', currentCategory, currentSubFilter === 'all' ? undefined : currentSubFilter);
+    // UI updated via hash -> applyHashState, but we call render and filter manually after hash change
+    // The applyHashState will be called from navigateTo, which calls renderExplorerTree & filterAndRender.
+}
+
+// Sub filter click
+function selectSubFilter(event, catId, sub) {
+    event.stopPropagation();
+    currentCategory = catId;
+    currentSubFilter = sub;
+    // Update hash
+    navigateTo('gallery', catId, sub === 'all' ? undefined : sub);
+}
+
+// ---------- CARD RENDERING ----------
 function renderCards(mods) {
     const grid = document.getElementById('modsGrid');
     grid.innerHTML = '';
 
     if (mods.length === 0) {
-        grid.innerHTML = `<p class="text-gray-500 col-span-full text-center text-xs py-12">هیچ مودی در این بخش پیدا نشد.</p>`;
+        grid.innerHTML = `<p class="text-gray-400 col-span-full text-center text-xs py-20">هیچ مودی در این بخش پیدا نشد.</p>`;
         return;
     }
 
     mods.forEach((mod, index) => {
-        const cardBox = document.createElement('div');
-        cardBox.className = "flex flex-col gap-3.5"; 
-        
-        cardBox.innerHTML = `
-            <div class="card-perspective h-52 w-full relative">
-                <div class="absolute -top-10 left-0 right-0 z-20 flex justify-between px-2 pointer-events-none">
-                    <div class="pill-anim bg-[#12131c]/90 border border-[#1e2030] text-white text-[11px] font-bold px-3.5 py-1.5 rounded-xl shadow-md truncate max-w-[60%]">
-                        ${mod.title}
-                    </div>
-                    <div class="pill-anim bg-[#12131c]/90 border border-[#1e2030] text-gray-300 text-[10px] px-3 py-1.5 rounded-xl shadow-md flex items-center gap-1.5 max-w-[38%]" style="animation-delay: 0.1s;">
-                        <img src="${mod.author.avatar}" class="w-3.5 h-3.5 rounded-full bg-[#0b0c10]">
-                        <span class="truncate text-cmAccent font-bold">By ${mod.author.name}</span>
-                    </div>
-                    <div class="flow-line h-4 -bottom-4"></div>
-                </div>
+        const cardWrapper = document.createElement('div');
+        cardWrapper.className = "flex flex-col gap-3 relative pt-8"; // pt-8 for pills
 
-                <div class="card-inner w-full h-full cursor-pointer" id="card-${index}" onclick="handleCardClick(event, ${index})">
-                    
-                    <div class="card-front bg-[#12131c] border border-[#1e2030]">
-                        <img src="${mod.image}" class="w-full h-full object-cover select-none" loading="lazy">
-                        
-                        <div class="absolute bottom-2 right-2 left-2 flex justify-between items-center bg-[#0b0c10]/85 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] text-gray-300 border border-[#1e2030]/60">
-                            <div class="flex items-center gap-3">
-                                <span><i class="fas fa-hdd text-cmAccent ml-1"></i>${mod.size}</span>
-                                <span><i class="fas fa-code-branch text-cmAccent ml-1"></i>v${mod.version}</span>
-                            </div>
-                            <span class="font-bold text-white uppercase text-[9px] bg-cmAccent/30 px-2 py-0.5 rounded-md border border-cmAccent/20">${mod.brand || mod.category}</span>
-                        </div>
-                    </div>
-
-                    <div class="card-back bg-[#12131c] border border-cmAccent/20">
-                        <img src="${mod.backImage}" class="w-full h-full object-cover select-none" loading="lazy">
-                        <div class="absolute top-2 left-2 bg-[#0b0c10]/70 backdrop-blur-sm px-2 py-0.5 rounded-md text-[9px] text-cmAccent font-bold border border-[#1e2030]">
-                            نمای عقب <i class="fas fa-sync-alt mr-1 text-[8px]"></i>
-                        </div>
-                    </div>
-
+        // Floating pills
+        cardWrapper.innerHTML = `
+            <div class="absolute top-0 right-0 left-0 flex justify-between items-center px-2 z-10">
+                <div class="mod-pill pill-animate max-w-[65%]" style="animation-delay: ${index * 0.08}s;" title="${mod.title}">${mod.title}</div>
+                <div class="mod-pill pill-animate flex items-center gap-2" style="animation-delay: ${index * 0.08 + 0.03}s;">
+                    <img src="${mod.author.avatar}" class="w-4 h-4 rounded-full object-cover border border-white/20">
+                    <span class="truncate max-w-[80px]">${mod.author.name}</span>
                 </div>
             </div>
 
-            <div class="w-full flex gap-2">
-                <button onclick="openInfoModal(event, ${index})" class="w-11 h-11 bg-[#12131c] hover:bg-[#1e2030] border border-[#1e2030] rounded-xl flex items-center justify-center text-cmAccent text-base transition-all shadow-md group">
-                    <i class="fas fa-info-circle group-hover:scale-110 transition-transform"></i>
+            <div class="card-perspective h-56 w-full">
+                <div class="card-inner w-full h-full cursor-pointer" id="card-${index}" onclick="flipCard(event, ${index})">
+                    <!-- FRONT FACE -->
+                    <div class="card-front bg-card-bg/40 border border-white/5 relative">
+                        <img src="${mod.image}" class="w-full h-full object-cover" loading="lazy">
+                        <div class="absolute bottom-0 right-0 left-0 bg-black/60 backdrop-blur-md px-3 py-1.5 flex items-center justify-between text-[10px] text-gray-300 border-t border-white/10 rounded-b-xl">
+                            <span><i class="fas fa-hdd ml-1 text-accent"></i>${mod.size}</span>
+                            <span><i class="fas fa-code-branch ml-1 text-accent"></i>${mod.version}</span>
+                            <span class="uppercase font-bold text-accent">${mod.category}</span>
+                            <span>${mod.brand || mod.subcategory || ''}</span>
+                        </div>
+                    </div>
+                    <!-- BACK FACE (only rear image) -->
+                    <div class="card-back bg-card-bg/40 border border-accent/10 relative">
+                        <img src="${mod.backImage}" class="w-full h-full object-cover" loading="lazy">
+                        <div class="absolute top-2 left-2 bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full text-[9px] text-gray-300 border border-white/10 flex items-center gap-1">
+                            <i class="fas fa-sync-alt text-accent text-[8px]"></i> Rear View
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button class="info-btn w-11 h-11 bg-card-bg/80 hover:bg-card-bg border border-white/5 rounded-xl flex items-center justify-center text-accent text-sm transition-all shadow-lg hover:shadow-accent/20" data-mod-index="${index}">
+                    <i class="fas fa-info-circle"></i>
                 </button>
-                <a href="${mod.download}" target="_blank" onclick="event.stopPropagation();" class="btn-download-glow flex-1 h-11 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2">
-                    <i class="fas fa-cloud-download-alt animate-bounce"></i> دانلود مستقیم مود
+                <a href="${mod.download}" target="_blank" class="download-btn flex-1 h-11 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 transition-all duration-200 active:scale-95">
+                    <i class="fas fa-download"></i> دانلود مستقیم
                 </a>
             </div>
         `;
-        grid.appendChild(cardBox);
+
+        grid.appendChild(cardWrapper);
+    });
+
+    // Attach event listeners for download buttons (micro-interactions)
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const originalHref = this.getAttribute('href');
+            const icon = this.querySelector('i');
+
+            // Tactile scale down
+            this.classList.add('btn-clicked');
+            setTimeout(() => this.classList.remove('btn-clicked'), 150);
+
+            // Change icon to wave and animate
+            if (icon) {
+                icon.className = 'fas fa-water download-wave';
+                // After animation duration, open link
+                setTimeout(() => {
+                    window.open(originalHref, '_blank');
+                    // Restore icon
+                    icon.className = 'fas fa-download';
+                }, 650);
+            } else {
+                window.open(originalHref, '_blank');
+            }
+        });
+    });
+
+    // Attach info button listeners
+    document.querySelectorAll('.info-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const modIndex = parseInt(this.getAttribute('data-mod-index'));
+            const mod = allMods.find(m => m.id === mods[modIndex].id); // find original mod
+            if (mod) openInfoModal(mod);
+        });
     });
 }
 
-function handleCardClick(event, index) {
+// Card flip
+function flipCard(event, index) {
     const card = document.getElementById(`card-${index}`);
     card.classList.toggle('card-flipped');
 }
 
+// ---------- FILTER & RENDER ----------
 function filterAndRender() {
     const search = document.getElementById('searchBar').value.toLowerCase();
-    let filtered = [];
-
-    if (currentCategory === 'latest') {
-        filtered = allMods.slice(0, 9);
-    } else {
-        filtered = allMods.filter(m => {
-            const matchCat = (m.category === currentCategory);
-            const matchSub = (currentSubFilter === 'all' || m.brand === currentSubFilter || m.subcategory === currentSubFilter);
-            return matchCat && matchSub;
-        });
-    }
-
-    if (search) {
-        filtered = filtered.filter(m => m.title.toLowerCase().includes(search) || m.tags.some(t => t.toLowerCase().includes(search)));
-    }
-
+    const filtered = allMods.filter(m => {
+        // currentCategory is never 'all', always a specific category
+        const matchCat = (m.category === currentCategory);
+        // sub filter: brand for cars, subcategory for maps, else 'all' ignores
+        let matchSub = true;
+        if (currentSubFilter !== 'all') {
+            if (currentCategory === 'cars') matchSub = (m.brand === currentSubFilter);
+            else if (currentCategory === 'maps') matchSub = (m.subcategory === currentSubFilter);
+            else matchSub = true; // no sub filter for other categories
+        }
+        const matchSearch = m.title.toLowerCase().includes(search) || m.tags.some(t => t.toLowerCase().includes(search));
+        return matchCat && matchSub && matchSearch;
+    });
     renderCards(filtered);
 }
 
-function openInfoModal(event, index) {
-    event.stopPropagation(); 
-    const cardContainer = event.currentTarget.closest('.flex-col');
-    const cardTitle = cardContainer.querySelector('.pill-anim').innerText.trim();
-    const mod = allMods.find(m => m.title.trim() === cardTitle);
-    
-    if(!mod) return;
-
+// ---------- INFO MODAL ----------
+function openInfoModal(mod) {
     document.getElementById('infoModalTitle').innerText = mod.title;
     document.getElementById('infoModalDesc').innerText = mod.description || "توضیحاتی برای این مود ثبت نشده است.";
     document.getElementById('infoModalAuthor').innerText = mod.author.name;
@@ -290,7 +383,7 @@ function openInfoModal(event, index) {
     const tagsBox = document.getElementById('infoModalTags');
     tagsBox.innerHTML = '';
     mod.tags.forEach(t => {
-        if(t) tagsBox.innerHTML += `<span class="bg-[#0b0c10] border border-[#1e2030] text-gray-400 text-[10px] px-2 py-0.5 rounded-md">#${t}</span>`;
+        if(t) tagsBox.innerHTML += `<span class="bg-primary/80 border border-white/5 text-gray-300 text-[10px] px-2 py-0.5 rounded-md">#${t}</span>`;
     });
 
     document.getElementById('infoModal').classList.remove('hidden');
@@ -302,5 +395,8 @@ function closeInfoModal() {
     setTimeout(() => document.getElementById('infoModal').classList.add('hidden'), 200);
 }
 
+// ---------- SEARCH EVENT ----------
 document.getElementById('searchBar').addEventListener('input', filterAndRender);
+
+// ---------- START ----------
 window.addEventListener('DOMContentLoaded', init);
