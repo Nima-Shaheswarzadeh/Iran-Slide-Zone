@@ -6,6 +6,7 @@
     <title>ایران اسلاید زون | Iran Slide Zone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -23,118 +24,6 @@
             }
         }
     </script>
-    <style>
-        @import url('https://v1.fontapi.ir/css/YekanBakh');
-        
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-drag: none;
-        }
-        
-        body { 
-            font-family: 'YekanBakh', 'Segoe UI', sans-serif; 
-            transition: background-color 0.25s ease, color 0.25s ease;
-        }
-
-        @keyframes neonFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .neon-line-border {
-            position: relative;
-            background: linear-gradient(90deg, #ff0055, #00ffcc, #7000ff, #ff0055);
-            background-size: 300% 300%;
-            animation: neonFlow 5s linear infinite;
-        }
-
-        .hanging-string {
-            position: absolute;
-            bottom: -16px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 16px;
-            background: linear-gradient(to bottom, #6366f1, #00ffcc);
-            z-index: 10;
-        }
-
-        .card-perspective {
-            position: relative;
-            width: 100%;
-            height: 210px;
-            padding: 2px;
-            border-radius: 1.5rem;
-            will-change: transform;
-        }
-        
-        .neon-card-flow {
-            background: linear-gradient(135deg, #ff0055, #00ffcc, #7000ff, #ff0055);
-            background-size: 400% 400%;
-            animation: neonFlow 8s linear infinite;
-        }
-
-        .img-layer {
-            position: absolute; inset: 2px; 
-            border-radius: 1.4rem; overflow: hidden;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            background: #1f2937;
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
-            will-change: transform, opacity;
-        }
-
-        .slanted-swap-out {
-            transform: translate(115%, -15%) rotate(12deg) scale(0.9) !important;
-            opacity: 0 !important;
-        }
-
-        .stagger-card {
-            opacity: 0; transform: translateY(12px);
-            animation: cardEntrance 0.35s ease-out forwards;
-        }
-        @keyframes cardEntrance { to { opacity: 1; transform: translateY(0); } }
-
-        .btn-download-rgb {
-            background: linear-gradient(90deg, #4f46e5, #6366f1, #4338ca);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.2s ease;
-        }
-        .dark .btn-download-rgb {
-            background: linear-gradient(90deg, #1e1b4b, #2e1065, #031e1a, #1a0c2e, #1e1b4b);
-            background-size: 300% 300%;
-            animation: neonFlow 6s ease infinite;
-        }
-        .btn-download-rgb:hover {
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-            transform: translateY(-0.5px);
-        }
-
-        .submenu-transition {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .submenu-open { max-height: 400px; }
-
-        .custom-scroll::-webkit-scrollbar { width: 3px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-        /* استایل اسکلتون لودینگ */
-        @keyframes skeletonShimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .skeleton-block {
-            background: linear-gradient(90deg, #22272e 25%, #2d333b 50%, #22272e 75%);
-            background-size: 200% 100%;
-            animation: skeletonShimmer 1.5s infinite linear;
-        }
-        .light .skeleton-block {
-            background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-            background-size: 200% 100%;
-        }
-    </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between dark:bg-zoneBg bg-zoneBgLight dark:text-gray-100 text-gray-800 transition-colors duration-200">
 
@@ -152,9 +41,13 @@
                 </button>
             </div>
             
-            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <div class="flex items-center gap-3 w-full md:w-auto justify-end flex-wrap">
                 <div class="p-[1px] rounded-xl neon-line-border shrink-0">
                     <div class="flex items-center gap-1 dark:bg-zoneBg bg-white p-0.5 rounded-xl">
+                        <button onclick="openLeaderboard()" id="headLeaderboardBtn" class="px-2.5 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-amber-500 dark:text-amber-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all gap-1.5">
+                            <i class="fas fa-trophy text-[11px] animate-bounce"></i> <span id="lblLeaderboard">لیدربرد</span>
+                        </button>
+                        <div class="w-[1px] h-4 bg-gray-300 dark:bg-white/10"></div>
                         <button onclick="toggleThemeMode()" id="themeBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs text-amber-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all">
                             <i class="fas fa-moon"></i>
                         </button>
@@ -203,16 +96,11 @@
                     </h3>
                     <div id="explorerTree" class="flex flex-col gap-1"></div>
                 </div>
-                <div class="pt-2 border-t dark:border-white/5 border-black/5">
-                    <button onclick="openLeaderboard()" id="sideLeaderboardBtn" class="w-full py-2.5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fas fa-trophy text-xs animate-bounce"></i> <span>لیدربرد ادمین ها</span>
-                    </button>
-                </div>
             </aside>
         </div>
 
         <main class="flex-1">
-            <div id="modsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-y-20 gap-x-5 pt-8"></div>
+            <div id="modsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-y-24 gap-x-5 pt-12"></div>
         </main>
     </section>
 
