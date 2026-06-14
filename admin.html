@@ -21,7 +21,11 @@
                     <select id="c" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 focus:outline-none">
                         <option value="cars">Cars 🚗</option>
                         <option value="maps">Maps 🗺️</option>
+                        <option value="csp">CSP 👨‍💻</option>
                         <option value="graphics">Graphics 🌠</option>
+                        <option value="servers">Servers 🌐</option>
+                        <option value="apps">Apps 📲</option>
+                        <option value="drivers">Drivers 👥</option>
                     </select>
                 </div>
                 <div><label class="block mb-1 text-gray-400">برند (مخصو‌ص ماشین)</label><input type="text" id="b" placeholder="IKCO / BMW" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5"></div>
@@ -35,11 +39,11 @@
             <div><label class="block mb-1 text-gray-400">لینک عکس نمای جلو (اصلی)</label><input type="url" id="img" required class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5"></div>
             <div><label class="block mb-1 text-gray-400">لینک عکس نمای عقب</label><input type="url" id="bimg" placeholder="در صورت خالی بودن، همان عکس جلو اعمال می‌شود" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5"></div>
             <div><label class="block mb-1 text-gray-400">لینک دانلود فایل</label><input type="url" id="d" required class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5"></div>
-            <div><label class="block mb-1 text-gray-400">تگ‌ها (جدا شده با کاما ,)</label><input type="text" id="tg" placeholder="drift, iran" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5"></div>
-            <div><label class="block mb-1 text-gray-400">توضیحات مود (نمایش پشت کارت و پاپ آپ)</label><textarea id="ds" rows="2" required class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 resize-none"></textarea></div>
+            <div><label class="block mb-1 text-gray-400">تگ‌ها (با کاما ,)</label><input type="text" id="tg" placeholder="drift, iran" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5"></div>
+            <div><label class="block mb-1 text-gray-400">توضیحات مود (نمایش پشت کارت)</label><textarea id="ds" rows="2" required class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 resize-none"></textarea></div>
             <button type="button" onclick="makeJSON()" class="w-full bg-[#6496FF] text-brandDark font-black py-2.5 rounded-xl hover:bg-blue-400 transition-all">تولید کد JSON</button>
         </form>
-        <textarea id="out" readonly placeholder="کد خروجی جهت کپی..." class="w-full h-24 bg-gray-950 border border-gray-800 rounded-xl p-3 font-mono text-[10px] mt-4 text-emerald-400 focus:outline-none resize-none" dir="ltr"></textarea>
+        <textarea id="out" readonly placeholder="کد خروجی..." class="w-full h-24 bg-gray-950 border border-gray-800 rounded-xl p-3 font-mono text-[10px] mt-4 text-emerald-400 focus:outline-none resize-none" dir="ltr"></textarea>
     </div>
     <script>
         function makeJSON(){
