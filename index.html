@@ -24,7 +24,6 @@
         }
     </script>
     <style>
-        /* تزریق فونت بسیار زیبای ایران یکان برای حذف خشکی متن‌ها */
         @import url('https://v1.fontapi.ir/css/Yekan');
         
         * {
@@ -38,7 +37,7 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* انیمیشن جریان خطی نئونی (Google Style Line Animation) */
+        /* انیمیشن لودینگ جریان خطی نئونی گوگل */
         @keyframes neonFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -52,7 +51,7 @@
             animation: neonFlow 6s ease infinite;
         }
 
-        /* استایل اختصاصی نخ فانتزی متصل کننده عنوان به اسلایدر */
+        /* اتصال تزیینی عنوان به اسلایدر */
         .hanging-string {
             position: absolute;
             bottom: -16px;
@@ -72,7 +71,6 @@
             border-radius: 1.5rem;
         }
         
-        /* افکت نئونی متحرک دور اسلایدر تصاویر */
         .neon-card-flow {
             background: linear-gradient(135deg, #ff0055, #00ffcc, #7000ff, #ff0055);
             background-size: 400% 400%;
@@ -98,7 +96,6 @@
         }
         @keyframes cardEntrance { to { opacity: 1; transform: translateY(0); } }
 
-        /* دکمه اختصاصی و متمایز دانلود */
         .btn-download-unique {
             background: linear-gradient(135deg, #059669 0%, #10b981 100%);
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
@@ -140,13 +137,15 @@
             </div>
             
             <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                <div class="flex items-center gap-1.5 dark:bg-white/5 bg-black/5 p-1 rounded-xl border dark:border-white/5 border-black/5 shadow-inner">
-                    <button onclick="toggleThemeMode()" id="themeBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs text-amber-400 hover:bg-white/10 dark:hover:bg-white/5 transition-all" title="Toggle Theme">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button onclick="toggleLanguage()" id="langBtn" class="px-2.5 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-indigo-500 hover:bg-white/10 dark:hover:bg-white/5 transition-all" title="Change Language">
-                        EN
-                    </button>
+                <div class="p-[1px] rounded-xl neon-line-border">
+                    <div class="flex items-center gap-1.5 dark:bg-[#06070d] bg-white p-1 rounded-xl shadow-inner">
+                        <button onclick="toggleThemeMode()" id="themeBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs text-amber-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all" title="Toggle Theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button onclick="toggleLanguage()" id="langBtn" class="px-2.5 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-indigo-500 hover:bg-black/5 dark:hover:bg-white/5 transition-all" title="Change Language">
+                            EN
+                        </button>
+                    </div>
                 </div>
                 <div class="relative w-full sm:w-72 p-[1px] rounded-xl neon-line-border">
                     <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full dark:bg-[#06070d] bg-white rounded-xl px-4 py-2 pr-10 text-xs dark:text-white text-gray-900 focus:outline-none transition-all">
@@ -169,10 +168,10 @@
         </div>
     </section>
 
-    <section id="categoriesPage" class="max-w-5xl w-full mx-auto px-4 py-16 hidden">
+    <section id="categoriesPage" class="max-w-6xl w-full mx-auto px-4 py-16 hidden">
         <h2 id="catPageTitle" class="text-lg font-black text-center mb-1">DATABASE LIBRARIES</h2>
         <p id="catPageSub" class="text-center text-[10px] text-gray-400 mb-10 uppercase tracking-widest">کتابخانه مود مورد نظر خود را انتخاب کنید</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="categoriesMenuGrid"></div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4" id="categoriesMenuGrid"></div>
         <div class="text-center mt-10">
             <button onclick="navigateTo('home')" id="exitHubBtn" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all"><i class="fas fa-arrow-right ml-1"></i> خروج از هاب</button>
         </div>
