@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iran Slide Zone | مرجع مود اسیدو کورسا</title>
+    <title>ایران اسلاید زون | Iran Slide Zone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -21,28 +21,40 @@
     </script>
     <style>
         @import url('https://v1.fontapi.ir/css/Vazir');
-        body { font-family: 'Vazir', sans-serif; background-color: #090F26; overflow-x: hidden; }
+        body { font-family: 'Vazir', sans-serif; background-color: #090F26; overflow-x: hidden; position: relative; }
         
+        /* پس‌زمینه متحرک مینیمال دورانی لوپ */
+        .bg-animation {
+            position: fixed; top: -50%; left: -50%; right: -50%; bottom: -50%;
+            background: radial-gradient(circle at 30% 30%, rgba(100, 150, 255, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 70%, rgba(16, 26, 64, 0.5) 0%, transparent 50%);
+            animation: spinBg 25s linear infinite; z-index: -1; pointer-events: none;
+        }
+        @keyframes spinBg { 100% { transform: rotate(360deg); } }
+
         /* افکت بلور اکریلیک */
         .acrylic { background: rgba(16, 26, 64, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .acrylic-flip { background: rgba(16, 26, 64, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         
-        /* ساختار چرخش کارت سه بعدی */
+        /* چرخش ۳ بعدی کارت */
         .card-perspective { perspective: 1200px; }
         .card-inner {
             position: relative; width: 100%; height: 100%;
             transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .card-flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { position: relative; width: 100%; height: 100%; backface-visibility: hidden; }
+        .card-front, .card-back { position: relative; width: 100%; height: 100%; backface-visibility: hidden; rounded-2xl; overflow: hidden; }
         .card-back { transform: rotateY(180deg); position: absolute; top: 0; left: 0; }
         
-        /* خط اتصال فلوچارتی */
+        /* خط اتصال فلوچارتی عنوان */
         .flow-line { position: absolute; width: 2px; background: linear-gradient(to bottom, #6496FF, rgba(100, 150, 255, 0.1)); left: 50%; transform: translateX(-50%); }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex flex-col justify-between">
 
-    <header id="mainHeader" class="border-b border-gray-800 bg-brandDark/40 backdrop-blur-md sticky top-0 z-40 px-4 py-4 hidden">
+    <div class="bg-animation"></div>
+
+    <header id="mainHeader" class="border-b border-gray-800/80 bg-brandDark/40 backdrop-blur-md sticky top-0 z-40 px-4 py-4 hidden">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('welcomePage')">
                 <span class="text-xl">🏁</span>
@@ -67,54 +79,39 @@
     </section>
 
     <section id="categoriesPage" class="max-w-5xl w-full mx-auto px-4 py-12 hidden">
-        <h2 class="text-xl font-bold text-center mb-2">انتخاب دسته‌بندی مود</h2>
-        <p class="text-center text-xs text-gray-500 mb-8">بخش مورد نظر خود را برای فیلتر و دانلود انتخاب کنید</p>
+        <h2 class="text-xl font-bold text-center mb-1 text-gray-100">انتخاب دسته‌بندی مود</h2>
+        <p class="text-center text-xs text-gray-500 mb-10">بخش مورد نظر خود را برای فیلتر و دانلود انتخاب کنید</p>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <div onclick="openCategory('cars')" class="relative h-44 rounded-2xl overflow-hidden cursor-pointer group border border-gray-800 shadow-lg">
-                <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=400" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-20 transition-all duration-500 blur-[1px]">
-                <div class="absolute inset-0 bg-gradient-to-t from-brandBg via-brandBg/60 to-transparent flex flex-col justify-end p-5">
-                    <span class="text-2xl mb-1">🚗</span>
-                    <h3 class="font-bold text-lg text-brandBlue">ماشین‌ها (Cars)</h3>
-                </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="categoriesMenuGrid">
             </div>
-            <div onclick="openCategory('maps')" class="relative h-44 rounded-2xl overflow-hidden cursor-pointer group border border-gray-800 shadow-lg">
-                <img src="https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?q=80&w=400" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-20 transition-all duration-500 blur-[1px]">
-                <div class="absolute inset-0 bg-gradient-to-t from-brandBg via-brandBg/60 to-transparent flex flex-col justify-end p-5">
-                    <span class="text-2xl mb-1">🗺️</span>
-                    <h3 class="font-bold text-lg text-brandBlue">نقشه‌ها (Maps)</h3>
-                </div>
-            </div>
-            <div onclick="openCategory('graphics')" class="relative h-44 rounded-2xl overflow-hidden cursor-pointer group group border border-gray-800 shadow-lg sm:col-span-2 md:col-span-1">
-                <img src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=400" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-20 transition-all duration-500 blur-[1px]">
-                <div class="absolute inset-0 bg-gradient-to-t from-brandBg via-brandBg/60 to-transparent flex flex-col justify-end p-5">
-                    <span class="text-2xl mb-1">🌠</span>
-                    <h3 class="font-bold text-lg text-brandBlue">گرافیک و آسمان</h3>
-                </div>
-            </div>
-        </div>
-        <div class="text-center mt-8">
+        
+        <div class="text-center mt-10">
             <button onclick="showPage('welcomePage')" class="text-xs text-gray-500 hover:text-brandBlue transition-all"><i class="fas fa-arrow-right ml-1"></i> بازگشت به خانه</button>
         </div>
     </section>
 
     <section id="galleryPage" class="max-w-7xl w-full mx-auto px-4 py-6 hidden flex-1">
-        
-        <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-800/60 pb-4" id="quickNav">
-            <button data-target="all" class="q-nav-btn px-4 py-2 bg-brandBlue text-brandDark font-bold rounded-xl text-xs transition-all">همه مودها</button>
-            <button data-target="cars" class="q-nav-btn px-4 py-2 bg-brandDark text-gray-400 rounded-xl text-xs hover:bg-gray-800 transition-all">🚗 Cars</button>
-            <button data-target="maps" class="q-nav-btn px-4 py-2 bg-brandDark text-gray-400 rounded-xl text-xs hover:bg-gray-800 transition-all">🗺️ Maps</button>
-            <button data-target="graphics" class="q-nav-btn px-4 py-2 bg-brandDark text-gray-400 rounded-xl text-xs hover:bg-gray-800 transition-all">🌠 Graphics</button>
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-800/60 pb-4" id="quickNav"></div>
+
+        <div class="mb-6 hidden" id="subFilterTriggerBox">
+            <button onclick="openSubFilterSelector()" class="bg-brandDark/80 hover:bg-brandDark border border-gray-800 text-xs text-gray-300 px-4 py-2.5 rounded-xl transition-all flex items-center gap-2">
+                <i class="fas fa-th-large text-brandBlue"></i>
+                <span id="activeSubFilterLabel">انتخاب برند خودرو (نمای اتوگالری)</span>
+            </button>
         </div>
 
-        <div id="subFilterSection" class="mb-8 hidden bg-brandDark/20 border border-gray-800/50 rounded-2xl p-3.5">
-            <h4 class="text-xs font-bold text-brandBlue mb-2.5" id="subFilterTitle">زیرمجموعه‌ها</h4>
-            <div class="flex flex-wrap gap-1.5" id="subFiltersContainer"></div>
-        </div>
-
-        <div id="modsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-16 gap-x-6 pt-6">
-            </div>
+        <div id="modsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-16 gap-x-6 pt-6"></div>
     </section>
+
+    <div id="cmModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" onclick="closeSubFilterSelector()">
+        <div class="bg-[#0b0f19] border border-gray-800 rounded-xl w-full max-w-4xl max-h-[85vh] overflow-y-auto p-6 shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-4 mb-4">
+                <h3 id="cmModalTitle" class="text-sm font-bold text-gray-300">انتخاب برند خودرو</h3>
+                <button onclick="closeSubFilterSelector()" class="text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="cmGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+        </div>
+    </div>
 
     <div id="descModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-brandDark border border-gray-800 rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl transition-all scale-95 duration-300" id="modalContainer">
