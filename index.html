@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" id="htmlTag">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         zoneBg: '#06070d',
+                        zoneBgLight: '#f8fafc',
                         zoneGlass: 'rgba(18, 20, 36, 0.65)',
+                        zoneGlassLight: 'rgba(255, 255, 255, 0.75)',
                         zoneBorder: 'rgba(255, 255, 255, 0.04)',
+                        zoneBorderLight: 'rgba(0, 0, 0, 0.06)',
                         zoneAccent: '#4f46e5',
                         zoneGlow: '#818cf8'
                     }
@@ -32,53 +36,54 @@
         
         body { 
             font-family: 'Vazir', sans-serif; 
-            background-color: #06070d; 
-            color: #f3f4f6;
-            overflow-x: hidden; 
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
-        
-        /* پس‌زمینه زنده و کهکشانی VisionOS */
+
+        /* پس‌زمینه پویا با غلظت رنگ متفاوت در لایت‌مود */
         .vision-bg {
             position: fixed; inset: -50%;
             background: radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.06) 0%, transparent 45%),
-                        radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, rgba(6, 7, 13, 1) 0%, transparent 100%);
+                        radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 50%);
             animation: cosmicShift 30s ease-in-out infinite alternate;
             z-index: -1; pointer-events: none;
         }
+        .dark .vision-bg {
+            background: radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.07) 0%, transparent 45%),
+                        radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(6, 7, 13, 1) 0%, transparent 100%);
+        }
         @keyframes cosmicShift {
             0% { transform: rotate(0deg) scale(1); }
-            100% { transform: rotate(5deg) scale(1.05); }
+            100% { transform: rotate(4deg) scale(1.03); }
         }
 
-        /* ساختار استک سه‌تایی تصاویر کارتی */
+        /* ساختار فیزیکی سه بعدی استک ۳ عکسی */
         .card-perspective {
             position: relative;
             width: 100%;
-            height: 220px;
+            height: 215px;
         }
         
-        /* لایه پایه و مشترک کارت‌ها */
         .img-layer {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 1.5rem;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            border-radius: 1.25rem; overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             background: #11121c;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, z-index 0s;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.4s ease, z-index 0s;
+        }
+        .light .img-layer {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: #e2e8f0;
         }
 
-        /* انیمیشن خروج مورب و کجکی (Slanted Swap) */
+        /* انیمیشن اصلی پرتاب مورب کجکی (Slanted Swap) */
         .slanted-swap-out {
-            transform: translate(115%, -15%) rotate(12deg) scale(0.9) !important;
+            transform: translate(120%, -20%) rotate(14deg) scale(0.88) !important;
             opacity: 0 !important;
         }
 
-        /* بازتاب نور متحرک روی شیشه کارت بالایی */
         .img-layer::after {
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
@@ -86,149 +91,165 @@
         }
         .card-perspective:hover .img-layer::after { transform: translateX(100%); }
 
-        /* انیمیشن پلهکانی لود شدن اولیه کارت‌ها */
         .stagger-card {
-            opacity: 0; transform: translateY(30px) scale(0.97);
-            animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0; transform: translateY(25px);
+            animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        @keyframes cardEntrance {
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        @keyframes cardEntrance { to { opacity: 1; transform: translateY(0); } }
 
-        /* دکمه اختصاصی دانلود لانچری دیسکورد نیترو */
         .btn-launch {
             background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
             position: relative; overflow: hidden;
-            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4), inset 0 1px 1px rgba(255,255,255,0.2);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3), inset 0 1px 1px rgba(255,255,255,0.15);
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         .btn-launch:hover {
             background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-            box-shadow: 0 6px 25px rgba(79, 70, 229, 0.6);
-            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
         }
-        .btn-launch:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(79, 70, 229, 0.4); }
+        .btn-launch:active { transform: scale(0.96); }
 
-        /* افکت شیشه‌ای پیشرفته اکاردئون سایدبار */
         .sidebar-folder {
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
         }
+
         .submenu-transition {
             max-height: 0; overflow: hidden;
-            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .submenu-open { max-height: 600px; }
+        .submenu-open { max-height: 500px; }
+
+        /* انیمیشن پاپ‌آپ ریز ۱ ثانیه‌ای پایین صفحه */
+        #toastNotice {
+            transform: translateY(100px) translateX(-50%);
+            opacity: 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+        #toastNotice.toast-show {
+            transform: translateY(0) translateX(-50%);
+            opacity: 1;
+        }
 
         .custom-scroll::-webkit-scrollbar { width: 3px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 20px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+        .light .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between dark:bg-zoneBg bg-zoneBgLight dark:text-gray-100 text-gray-800 transition-colors duration-300">
 
     <div class="vision-bg"></div>
 
-    <header id="mainHeader" class="border-b border-zoneBorder bg-zoneBg/80 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 hidden">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+    <header id="mainHeader" class="border-b dark:border-zoneBorder border-zoneBorderLight dark:bg-zoneBg/80 bg-white/80 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 hidden">
+        <div class="max-w-[1600px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
-                    <span class="text-xl">🏁</span>
-                    <h1 class="text-xs font-black tracking-widest text-white uppercase bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">IRAN SLIDE ZONE</h1>
+                    <span class="text-xl">🏎️</span>
+                    <h1 id="headerLogoText" class="text-xs font-black tracking-widest bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent uppercase">IRAN SLIDE ZONE</h1>
                 </div>
-                <button id="audioToggleBtn" onclick="toggleMute()" class="text-gray-500 hover:text-white text-xs bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 transition-all">
-                    <i class="fas fa-volume-up ml-1"></i> <span>صدا: روشن</span>
+                <button id="audioToggleBtn" onclick="toggleMute()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-[11px] dark:bg-white/5 bg-black/5 px-2.5 py-1 rounded-lg border dark:border-white/5 border-black/5 transition-all">
+                    <i class="fas fa-volume-up ml-1"></i> <span id="lblAudioState">صدا: روشن</span>
                 </button>
             </div>
-            <div class="relative w-full sm:w-80">
-                <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-2 pr-10 text-xs text-white focus:outline-none focus:border-zoneAccent focus:bg-white/10 transition-all">
-                <i class="fas fa-search absolute left-3 top-3 text-gray-500 text-xs"></i>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <div class="flex items-center gap-1.5 dark:bg-white/5 bg-black/5 p-1 rounded-xl border dark:border-white/5 border-black/5 shadow-inner">
+                    <button onclick="toggleThemeMode()" id="themeBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs text-amber-400 hover:bg-white/10 dark:hover:bg-white/5 transition-all" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button onclick="toggleLanguage()" id="langBtn" class="px-2.5 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-indigo-500 hover:bg-white/10 dark:hover:bg-white/5 transition-all" title="Change Language">
+                        EN
+                    </button>
+                </div>
+                <div class="relative w-full sm:w-72">
+                    <input type="text" id="searchBar" placeholder="جستجو پیشرفته در دیتابیس..." class="w-full dark:bg-white/5 bg-black/5 border dark:border-white/5 border-black/5 rounded-xl px-4 py-2 pr-10 text-xs dark:text-white text-gray-900 focus:outline-none focus:border-zoneAccent transition-all">
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                </div>
             </div>
         </div>
     </header>
 
     <section id="welcomePage" class="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 hidden">
-        <div class="max-w-xl bg-zoneGlass border border-zoneBorder p-12 rounded-3xl shadow-2xl backdrop-blur-2xl relative overflow-hidden">
-            <div class="absolute -top-24 -left-24 w-48 h-48 bg-zoneAccent/20 rounded-full blur-3xl"></div>
-            <span class="text-5xl inline-block mb-4">🏎️</span>
-            <h2 class="text-2xl font-black text-white mb-3 bg-gradient-to-b from-white to-gray-300 bg-clip-text text-transparent">ایران اسلاید زون</h2>
-            <p class="text-gray-400 text-xs leading-relaxed mb-8 font-medium">پلتفرم فوق‌حرفه‌ای و اختصاصی شبیه‌سازی و مدیریت مودهای بهینه شده بازی Assetto Corsa زنده متصل به کلاود بورد.</p>
-            <button onclick="navigateTo('categories')" class="btn-launch text-white font-black px-12 py-4 rounded-xl text-xs tracking-wider transition-all">
+        <div class="max-w-xl dark:bg-zoneGlass bg-white/70 border dark:border-zoneBorder border-zoneBorderLight p-12 rounded-3xl shadow-2xl backdrop-blur-2xl relative overflow-hidden">
+            <span class="text-5xl inline-block mb-4">🏁</span>
+            <h2 id="welcomeTitle" class="text-2xl font-black mb-3">ایران اسلاید زون</h2>
+            <p id="welcomeDesc" class="text-gray-400 dark:text-gray-400 text-xs leading-relaxed mb-8 font-medium">پلتفرم فوق‌حرفه‌ای و اختصاصی شبیه‌سازی و مدیریت مودهای بهینه شده بازی Assetto Corsa زنده متصل به کلاود بورد.</p>
+            <button onclick="navigateTo('categories')" id="welcomeBtn" class="btn-launch text-white font-black px-12 py-4 rounded-xl text-xs tracking-wider transition-all">
                 LAUNCH MOD HUB <i class="fas fa-chevron-left mr-2"></i>
             </button>
         </div>
     </section>
 
     <section id="categoriesPage" class="max-w-5xl w-full mx-auto px-4 py-16 hidden">
-        <h2 class="text-lg font-black text-center mb-1 text-white">DATABASE LIBRARIES</h2>
-        <p class="text-center text-[11px] text-gray-500 mb-10 uppercase tracking-widest">کتابخانه مود مورد نظر خود را انتخاب کنید</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="categoriesMenuGrid"></div>
+        <h2 id="catPageTitle" class="text-lg font-black text-center mb-1">DATABASE LIBRARIES</h2>
+        <p id="catPageSub" class="text-center text-[10px] text-gray-400 mb-10 uppercase tracking-widest">کتابخانه مود مورد نظر خود را انتخاب کنید</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="categoriesMenuGrid"></div>
         <div class="text-center mt-10">
-            <button onclick="navigateTo('home')" class="text-xs text-gray-500 hover:text-white transition-all"><i class="fas fa-arrow-right ml-1"></i> خروج از هاب</button>
+            <button onclick="navigateTo('home')" id="exitHubBtn" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all"><i class="fas fa-arrow-right ml-1"></i> خروج از هاب</button>
         </div>
     </section>
 
     <section id="galleryPage" class="max-w-[1600px] w-full mx-auto px-6 py-6 hidden flex-1 flex flex-col md:flex-row gap-8">
-        
-        <aside class="w-full md:w-72 bg-zoneGlass border border-zoneBorder rounded-3xl p-5 h-auto md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl">
+        <aside class="w-full md:w-72 dark:bg-zoneGlass bg-white/60 border dark:border-zoneBorder border-zoneBorderLight rounded-3xl p-5 h-auto md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl shadow-sm">
             <div class="flex flex-col gap-2">
-                <h3 class="text-[10px] font-black text-gray-400 mb-2 pb-2.5 border-b border-white/5 flex items-center gap-2 uppercase tracking-widest">
+                <h3 class="text-[10px] font-black text-gray-400 mb-2 pb-2.5 border-b dark:border-white/5 border-black/5 flex items-center gap-2 uppercase tracking-widest">
                     <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> ISZ MOD MANAGER
                 </h3>
                 <div id="explorerTree" class="flex flex-col gap-1.5"></div>
             </div>
-            
-            <div class="pt-3 border-t border-white/5">
-                <button onclick="openLeaderboard()" class="w-full py-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg group">
-                    <i class="fas fa-trophy text-xs animate-bounce group-hover:scale-110 transition-transform"></i> 
-                    <span>🏆 جدول ادمین‌های فعال</span>
+            <div class="pt-3 border-t dark:border-white/5 border-black/5">
+                <button onclick="openLeaderboard()" id="sideLeaderboardBtn" class="w-full py-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fas fa-trophy text-xs animate-bounce"></i> <span>🏆 جدول ادمین‌های فعال</span>
                 </button>
             </div>
         </aside>
 
         <main class="flex-1">
-            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-14 gap-x-6 pt-12">
-                </div>
+            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-12 gap-x-6 pt-6"></div>
         </main>
     </section>
 
-    <div id="infoModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" onclick="closeInfoModal()">
-        <div class="bg-[#11121c] border border-white/10 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl scale-95 transition-all duration-300" id="infoModalContainer" onclick="event.stopPropagation()">
-            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-[#06070d]">
-                <h3 id="infoModalTitle" class="font-black text-xs text-white">SPECIFICATIONS</h3>
-                <button onclick="closeInfoModal()" class="text-gray-400 hover:text-white text-base transition-all"><i class="fas fa-times"></i></button>
+    <div id="toastNotice" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/95 dark:bg-white/95 text-white dark:text-gray-900 px-5 py-2.5 rounded-xl text-xs font-bold shadow-xl border dark:border-white/10 border-black/5 z-50 pointer-events-none flex items-center gap-2">
+        <i class="fas fa-circle-info text-indigo-500 text-xs"></i>
+        <span id="toastText">عملیات انجام شد</span>
+    </div>
+
+    <div id="infoModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" onclick="closeInfoModal()">
+        <div class="dark:bg-[#11121c] bg-white border dark:border-white/10 border-black/10 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl scale-95 transition-all duration-300" id="infoModalContainer" onclick="event.stopPropagation()">
+            <div class="p-4 border-b dark:border-white/5 border-black/5 flex justify-between items-center dark:bg-[#06070d] bg-gray-50">
+                <h3 id="infoModalTitle" class="font-black text-xs">SPECIFICATIONS</h3>
+                <button onclick="closeInfoModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-base"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 space-y-4 text-xs">
                 <div>
-                    <h4 class="text-gray-400 font-bold mb-1.5">توضیحات و بررسی فنی:</h4>
-                    <p id="infoModalDesc" class="text-gray-300 leading-relaxed text-justify bg-[#06070d] p-4 rounded-xl border border-white/5"></p>
+                    <h4 id="modalDescTitle" class="text-gray-400 font-bold mb-1.5">توضیحات و بررسی فنی:</h4>
+                    <p id="infoModalDesc" class="dark:text-gray-300 text-gray-700 leading-relaxed text-justify dark:bg-[#06070d] bg-gray-50 p-4 rounded-xl border dark:border-white/5 border-black/5"></p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-gray-400 font-bold">تگ‌های متادیتا:</span>
+                    <span id="modalTagsTitle" class="text-gray-400 font-bold">تگ‌های متادیتا:</span>
                     <div id="infoModalTags" class="flex flex-wrap gap-1"></div>
                 </div>
-                <div class="flex items-center justify-between border-t border-white/5 pt-4 text-[11px]">
+                <div class="flex items-center justify-between border-t dark:border-white/5 border-black/5 pt-4 text-[11px]">
                     <div class="flex items-center gap-2">
-                        <img id="infoModalAvatar" class="w-5 h-5 rounded-full bg-white/10" src="">
-                        <span>توسعه و تست: <strong id="infoModalAuthor" class="text-white"></strong></span>
+                        <img id="infoModalAvatar" class="w-5 h-5 rounded-full bg-gray-200" src="">
+                        <span class="text-gray-500"><span id="modalAuthorTitle">توسعه و تست</span>: <strong id="infoModalAuthor" class="dark:text-white text-gray-900"></strong></span>
                     </div>
-                    <span id="infoModalCategory" class="text-zoneGlow font-black bg-zoneAccent/20 px-2.5 py-1 rounded-md uppercase border border-zoneAccent/20"></span>
+                    <span id="infoModalCategory" class="text-zoneGlow font-black bg-zoneAccent/10 px-2.5 py-1 rounded-md uppercase border border-zoneAccent/20"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="leaderboardModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden" onclick="closeLeaderboard()">
-        <div class="bg-[#11121c]/95 border border-amber-500/20 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl scale-95 transition-all duration-300" id="leaderboardContainer" onclick="event.stopPropagation()">
-            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-[#06070d]">
-                <h3 class="font-black text-xs text-amber-400 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-crown text-xs"></i> ACTIVE ADMINS LEADERBOARD</h3>
-                <button onclick="closeLeaderboard()" class="text-gray-400 hover:text-white text-base"><i class="fas fa-times"></i></button>
+    <div id="leaderboardModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" onclick="closeLeaderboard()">
+        <div class="dark:bg-[#11121c] bg-white border dark:border-amber-500/20 border-amber-500/30 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl scale-95 transition-all duration-300" id="leaderboardContainer" onclick="event.stopPropagation()">
+            <div class="p-4 border-b dark:border-white/5 border-black/5 flex justify-between items-center dark:bg-[#06070d] bg-gray-50">
+                <h3 class="font-black text-xs text-amber-500 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-crown text-xs"></i> LEADERBOARD</h3>
+                <button onclick="closeLeaderboard()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-base"><i class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 space-y-3" id="leaderboardList"></div>
+            <div class="p-6 space-y-3 max-h-[450px] overflow-y-auto custom-scroll" id="leaderboardList"></div>
         </div>
     </div>
 
-    <footer class="border-t border-white/5 bg-[#06070d] py-4 text-center text-xs text-gray-500 font-bold tracking-wide">
+    <footer id="mainFooter" class="border-t dark:border-white/5 border-black/5 dark:bg-[#06070d] bg-gray-100 py-4 text-center text-xs text-gray-400 dark:text-gray-500 font-bold tracking-wide transition-colors">
         تمامی حقوق و کپی‌رایت برای نیما شهسوارزاده محفوظ است.
     </footer>
 
