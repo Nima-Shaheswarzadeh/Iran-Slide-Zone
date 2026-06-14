@@ -1,1 +1,118 @@
+@import url('https://v1.fontapi.ir/css/YekanBakh');
 
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+body { 
+    font-family: 'YekanBakh', 'Segoe UI', sans-serif; 
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* افکت موج رنگی نئون بورد */
+@keyframes neonFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.neon-line-border {
+    position: relative;
+    background: linear-gradient(90deg, #ff0055, #00ffcc, #7000ff, #ff0055);
+    background-size: 300% 300%;
+    animation: neonFlow 5s linear infinite;
+}
+
+/* رشته اتصال معلق نام مود */
+.hanging-string {
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 16px;
+    background: linear-gradient(to bottom, #6366f1, #00ffcc);
+    z-index: 10;
+}
+
+/* لایه‌های ۳ تایی گالری تصاویر */
+.card-perspective {
+    position: relative;
+    width: 100%;
+    height: 210px;
+    padding: 2px;
+    border-radius: 1.5rem;
+    will-change: transform;
+}
+
+.neon-card-flow {
+    background: linear-gradient(135deg, #ff0055, #00ffcc, #7000ff, #ff0055);
+    background-size: 400% 400%;
+    animation: neonFlow 8s linear infinite;
+}
+
+.img-layer {
+    position: absolute; inset: 2px; 
+    border-radius: 1.4rem; overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    background: #1f2937;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+    will-change: transform, opacity;
+}
+
+.slanted-swap-out {
+    transform: translate(115%, -15%) rotate(12deg) scale(0.9) !important;
+    opacity: 0 !important;
+}
+
+/* انیمیشن لود نرم کارت‌ها */
+.stagger-card {
+    opacity: 0; transform: translateY(12px);
+    animation: cardEntrance 0.35s ease-out forwards;
+}
+@keyframes cardEntrance { to { opacity: 1; transform: translateY(0); } }
+
+/* دکمه دانلود با انیمیشن RGB ثابت برای هردو حالت روز و شب */
+.btn-download-rgb {
+    background: linear-gradient(90deg, #1e1b4b, #2e1065, #031e1a, #1a0c2e, #1e1b4b);
+    background-size: 300% 300%;
+    animation: neonFlow 6s ease infinite;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.2s ease;
+}
+.light .btn-download-rgb {
+    background: linear-gradient(90deg, #4f46e5, #6366f1, #3b82f6, #4f46e5);
+    background-size: 300% 300%;
+    animation: neonFlow 5s ease infinite;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.btn-download-rgb:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: translateY(-0.5px);
+}
+
+.submenu-transition {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.submenu-open { max-height: 400px; }
+
+.custom-scroll::-webkit-scrollbar { width: 3px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+/* سیستم اسکلتون لودینگ (Skeleton Shimmer) */
+@keyframes skeletonShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.skeleton-block {
+    background: linear-gradient(90deg, #22272e 25%, #2d333b 50%, #22272e 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite linear;
+}
+.light .skeleton-block {
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+}
