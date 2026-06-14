@@ -3,8 +3,8 @@ let currentCategory = 'all';
 let currentSubFilter = 'all';
 let openCategoryTree = null; // برای ثبت دسته‌بندی باز شده در سایدبار
 
-// شناسه گوگل شیت خودت را دقیقاً اینجا بگذار
-const SPREADSHEET_ID = "1A2B3C4D5E6F7G8H9I0J"; 
+// شناسه گوگل شیت شما به صورت اختصاصی ست شد:
+const SPREADSHEET_ID = "1RFi_Luu7Ip9IWrhI8KaSOlhaPEVSn7RZKAzdi-JZmSA"; 
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
 const mainCategories = [
