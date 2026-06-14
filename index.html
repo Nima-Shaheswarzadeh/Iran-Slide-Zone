@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ایران اسلاید زون | Premium AC Mod Manager</title>
+    <title>ایران اسلاید زون | Premium AC Mod Manager V6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -51,41 +51,44 @@
             100% { transform: rotate(5deg) scale(1.05); }
         }
 
-        /* ساختار سه بعدی پریمیوم بدون باگ با تکنولوژی Will-Change */
-        .card-perspective { perspective: 2500px; }
-        .card-inner {
-            position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d; 
-            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        /* ساختار استک سه‌تایی تصاویر کارتی */
+        .card-perspective {
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+        
+        /* لایه پایه و مشترک کارت‌ها */
+        .img-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             border-radius: 1.5rem;
-            will-change: transform;
-        }
-        .card-flipped { transform: rotateY(180deg); }
-        
-        .card-front, .card-back { 
-            position: absolute; inset: 0; width: 100%; height: 100%; 
-            backface-visibility: hidden; 
-            -webkit-backface-visibility: hidden;
-            border-radius: 1.5rem; overflow: hidden; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             background: #11121c;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, z-index 0s;
         }
-        .card-back { transform: rotateY(180deg); }
-        
-        /* بازتاب نور متحرک روی شیشه کارت‌ها هنگام هاور */
-        .card-front::after {
+
+        /* انیمیشن خروج مورب و کجکی (Slanted Swap) */
+        .slanted-swap-out {
+            transform: translate(115%, -15%) rotate(12deg) scale(0.9) !important;
+            opacity: 0 !important;
+        }
+
+        /* بازتاب نور متحرک روی شیشه کارت بالایی */
+        .img-layer::after {
             content: ''; position: absolute; inset: 0;
-            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
+            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
             transform: translateX(-100%); transition: transform 0.6s ease; pointer-events: none;
         }
-        .card-perspective:hover .card-front::after { transform: translateX(100%); }
-        .card-perspective:hover .card-inner { transform: translateY(-6px); box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
-        .card-perspective:hover .card-flipped { transform: rotateY(180deg) translateY(-6px); }
+        .card-perspective:hover .img-layer::after { transform: translateX(100%); }
 
-        /* انیمیشن پلهکانی لود شدن کارت‌ها (Staggered Animation) */
+        /* انیمیشن پلهکانی لود شدن اولیه کارت‌ها */
         .stagger-card {
-            opacity: 0; transform: translateY(30px) scale(0.95);
+            opacity: 0; transform: translateY(30px) scale(0.97);
             animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes cardEntrance {
@@ -170,10 +173,9 @@
         <aside class="w-full md:w-72 bg-zoneGlass border border-zoneBorder rounded-3xl p-5 h-auto md:h-[calc(100vh-140px)] sticky top-24 overflow-y-auto custom-scroll flex flex-col justify-between gap-4 backdrop-blur-2xl">
             <div class="flex flex-col gap-2">
                 <h3 class="text-[10px] font-black text-gray-400 mb-2 pb-2.5 border-b border-white/5 flex items-center gap-2 uppercase tracking-widest">
-                    <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> AC MOD MANAGER
+                    <i class="fas fa-folder-tree text-zoneGlow text-xs"></i> ISZ MOD MANAGER
                 </h3>
-                <div id="explorerTree" class="flex flex-col gap-1.5">
-                    </div>
+                <div id="explorerTree" class="flex flex-col gap-1.5"></div>
             </div>
             
             <div class="pt-3 border-t border-white/5">
@@ -185,7 +187,7 @@
         </aside>
 
         <main class="flex-1">
-            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-16 gap-x-6 pt-4">
+            <div id="modsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-14 gap-x-6 pt-12">
                 </div>
         </main>
     </section>
@@ -222,8 +224,7 @@
                 <h3 class="font-black text-xs text-amber-400 flex items-center gap-2 uppercase tracking-wider"><i class="fas fa-crown text-xs"></i> ACTIVE ADMINS LEADERBOARD</h3>
                 <button onclick="closeLeaderboard()" class="text-gray-400 hover:text-white text-base"><i class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 space-y-3" id="leaderboardList">
-                </div>
+            <div class="p-6 space-y-3" id="leaderboardList"></div>
         </div>
     </div>
 
